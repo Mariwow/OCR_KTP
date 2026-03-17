@@ -5,12 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\ReadKtp;
+use App\Models\Admin;
 
 class KtpVerified extends Model
 {
-    protected $table = 'ktp_verified';
-    
-
     protected $fillable = [
         'submission_id',
         'nik',
@@ -28,12 +26,18 @@ class KtpVerified extends Model
         'status_perkawinan',
         'pekerjaan',
         'kewarganegaraan',
-        'golongan_darah',
-        'berlaku_hingga',
-        'approved_at'
+        'berlaku_sampai',
+        'ktp_image_path',
+        'verified_by'
     ];
     public function readKtp()
     {
         return $this->belongsTo(ReadKtp::class, 'submission_id', 'id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(user::class, 'verified_by', 'id');
+    }
+
 }

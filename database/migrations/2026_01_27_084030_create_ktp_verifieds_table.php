@@ -31,13 +31,21 @@ return new class extends Migration
             $table->string('pekerjaan');
             $table->string('kewarganegaraan');
             $table->string('berlaku_sampai')->nullable();
+            $table->unsignedBigInteger('verified_by')->nullable();
 
+            $table->string('ktp_image_path');
+            
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
 
             $table->foreign('submission_id')
                   ->references('id')
                   ->on('read_ktp')
+                  ->onDelete('cascade');
+
+             $table->foreign('verified_by')
+                  ->references('id')
+                  ->on('users')
                   ->onDelete('cascade');
         });
     }

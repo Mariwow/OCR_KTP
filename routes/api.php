@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\KtpVerificationController;
 use App\Http\Controllers\ReadKtpController;
+use App\Http\Controllers\PassportController;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,3 +32,7 @@ Route::post('/ktp/{id}/approve', [KtpVerificationController::class, 'approve']);
 Route::post('/ktp/{id}/reject', [KtpVerificationController::class, 'reject']);
 
 Route::post('/ktp/ocr', [ReadKtpController::class, 'store']);
+
+Route::post('/passport/upload', [PassportController::class, 'upload'])->name('passport.upload');
+
+Route::post('/register', [AuthController::class, 'register']);

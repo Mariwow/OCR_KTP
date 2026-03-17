@@ -28,15 +28,21 @@ class ReadKtp extends Model
         'pekerjaan',
         'kewarganegaraan',
         'golongan_darah',
-        'berlaku_hingga',
+        'berlaku_sampai',
         'ktp_image_path',
         'ocr_raw_text',
         'status',
-        'verified_by',
-        'notes'
+        'uploaded_by',
+        'note'
     ];
+
     public function verified()
     {
         return $this->hasOne(KtpVerified::class, 'submission_id', 'id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'uploaded_by', 'id');
     }
 }

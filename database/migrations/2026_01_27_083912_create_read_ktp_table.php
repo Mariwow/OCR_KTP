@@ -36,11 +36,16 @@ return new class extends Migration
 
             $table->string('status');
 
-            $table->unsignedBigInteger('verified_by')->nullable();
+            $table->unsignedBigInteger('uploaded_by')->nullable();
             $table->text('note')->nullable();
 
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
+
+             $table->foreign('uploaded_by')
+                  ->references('id')
+                  ->on('users')
+                  ->onDelete('cascade');
         });
     }
 
