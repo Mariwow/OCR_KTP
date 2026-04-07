@@ -159,7 +159,7 @@
                                 
                                 <div class="tab-pane fade show active" id="createAccountTab" role="tabpanel">
                                     <div class="card-body">
-                                        <form action="{{ route('account.store') }}" method="POST">
+                                       <form id="formAddAccount" action="{{ route('account.store') }}" method="POST">
                                             @csrf
                                             <div class="mb-4 d-flex align-items-center justify-content-between">
                                                 <h5 class="fw-bold mb-0 me-4">
@@ -173,7 +173,7 @@
                                                 <div class="col-lg-8">
                                                     <div class="input-group">
                                                         <div class="input-group-text"><i class="feather-user"></i></div>
-                                                        <input type="text" name="name" class="form-control" placeholder="Name" required>
+                                                        <input type="text" name="name" class="form-control" placeholder="Name" value="{{ old('name') }}" required>
                                                     </div>
                                                 </div>
                                             </div>
@@ -183,7 +183,10 @@
                                                 <div class="col-lg-8">
                                                     <div class="input-group">
                                                         <div class="input-group-text"><i class="feather-mail"></i></div>
-                                                        <input type="email" name="email" class="form-control" placeholder="Email" required>
+                                                        <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" placeholder="Email" value="{{ old('email') }}" required>
+                                                        @error('email')
+                                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
                                                 </div>
                                             </div>
@@ -193,7 +196,10 @@
                                                 <div class="col-lg-8">
                                                     <div class="input-group">
                                                         <div class="input-group-text"><i class="feather-lock"></i></div>
-                                                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                                                        <input type="password" id="input_password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Password" required>
+                                                        @error('password')
+                                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
                                                 </div>
                                             </div>
@@ -203,7 +209,10 @@
                                                 <div class="col-lg-8">
                                                     <div class="input-group">
                                                         <div class="input-group-text"><i class="feather-lock"></i></div>
-                                                        <input type="password" name="password_confirmation" class="form-control" placeholder="Confirm Password" required>
+                                                        <input type="password" id="input_password_confirmation" name="password_confirmation" class="form-control" placeholder="Confirm Password" required>
+                                                        <div class="invalid-feedback" id="js-password-error" style="display: none;">
+                                                            Password dan Konfirmasi Password tidak sama!
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -260,13 +269,15 @@
                                                         <td>{{ $user->created_at->format('d M Y, H:i') }}</td>
                                                         <td>
                                                             <div class="hstack gap-2 justify-content-end">
-                                                                <a href="javascript:void(0);" onclick="openEditPasswordModal({{ $user->id }})" class="avatar-text avatar-md" title="Ubah Password">
+                                                                <a href="javascript:void(0);" onclick="openEditAccountModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->email }}', '{{ $user->role }}')" class="avatar-text avatar-md" title="Edit Akun">
                                                                     <i class="fas fa-edit"></i>
                                                                 </a>
                                                                 
-                                                                <a href="javascript:void(0);" onclick="openDeleteAccountModal({{ $user->id }}, '{{ $user->name }}')" class="avatar-text avatar-md text-danger" title="Hapus Akun">
-                                                                    <i class="fa solid fa-trash"></i>
-                                                                </a>
+                                                                @if ($user->id !== auth()->id())
+                                                                    <a href="javascript:void(0);" onclick="openDeleteAccountModal({{ $user->id }}, '{{ $user->name }}')" class="avatar-text avatar-md text-danger" title="Hapus Akun">
+                                                                        <i class="fa solid fa-trash"></i>
+                                                                    </a>
+                                                                @endif
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -441,39 +452,65 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="modalEditPassword" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalEditAccount" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-lg">
                 <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-key me-2"></i>Ubah Password</h5>
+                    <h5 class="modal-title fw-bold"><i class="fas fa-user-edit me-2"></i>Edit Akun</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
-                <form id="formEditPassword" method="POST">
+                <form id="formEditAccount" method="POST" action="">
                     @csrf
-                    @method('PUT') <div class="modal-body p-4">
+                    @method('PUT') 
+                    <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Password Lama</label>
-                            <input type="password" class="form-control" name="old_password" placeholder="Masukkan password saat ini" required>
+                            <label class="form-label fw-bold">Nama</label>
+                            <input type="text" class="form-control" name="name" id="edit_name" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Password Baru</label>
-                            <input type="password" class="form-control" name="new_password" placeholder="Buat password baru" required>
+                            <label class="form-label fw-bold">Email</label>
+                            <input type="email" class="form-control" name="email" id="edit_email" required>
                         </div>
-                        <div class="mb-0">
-                            <label class="form-label fw-bold">Konfirmasi Password Baru</label>
-                            <input type="password" class="form-control" name="new_password_confirmation" placeholder="Ulangi password baru" required>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Role</label>
+                            <select name="role" id="edit_role" class="form-control" required>
+                                <option value="fo">Front Office</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="form-label fw-bold mb-0">Ubah Password?</label>
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePassword">
+                                Ya, Ganti Password
+                            </button>
+                        </div>
+                        
+                        <div class="collapse" id="collapsePassword">
+                            <div class="alert alert-warning py-2" style="font-size: 0.85rem;">
+                                Biarkan kosong jika tidak ingin mengubah password akun ini.
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password Baru</label>
+                                <input type="password" class="form-control" name="password" placeholder="Minimal 8 karakter">
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label">Konfirmasi Password Baru</label>
+                                <input type="password" class="form-control" name="password_confirmation" placeholder="Ulangi password baru">
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan Password</button>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
     <div class="modal fade" id="modalDeleteAccount" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content text-center shadow-lg">
@@ -529,17 +566,24 @@
 </html>
 
 <script>
-    function openEditPasswordModal(id) {
-        // Ganti '/users/password/' dengan format URL (Route) kamu yang sebenarnya
-        const url = `/users/password/${id}`; 
-        document.getElementById('formEditPassword').action = url;
-        
-        // Bersihkan isian form kalau sebelumnya pernah diketik lalu ditutup
-        document.getElementById('formEditPassword').reset();
-        
-        // Munculkan Modalnya
-        new bootstrap.Modal(document.getElementById('modalEditPassword')).show();
-    }
+    function openEditAccountModal(id, name, email, role) {
+    // 1. Isi form dengan data user saat ini
+    document.getElementById('edit_name').value = name;
+    document.getElementById('edit_email').value = email;
+    document.getElementById('edit_role').value = role;
+
+    // 2. Ubah URL action pada form secara dinamis sesuai ID user
+    // Sesuaikan prefix '/accountControl/update/' dengan rute yang kamu buat
+    document.getElementById('formEditAccount').action = '/accountControl/update/' + id;
+
+    // 3. Pastikan kolom password tertutup dan kosong saat modal baru dibuka
+    document.querySelector('input[name="password"]').value = '';
+    document.querySelector('input[name="password_confirmation"]').value = '';
+    
+    // 4. Tampilkan modalnya
+    var myModal = new bootstrap.Modal(document.getElementById('modalEditAccount'));
+    myModal.show();
+}
 
     function openDeleteAccountModal(id, name) {
         // Ganti '/users/' dengan format URL (Route) hapus kamu yang sebenarnya
@@ -552,4 +596,24 @@
         // Munculkan Modalnya
         new bootstrap.Modal(document.getElementById('modalDeleteAccount')).show();
     }
+
+    document.getElementById('formAddAccount').addEventListener('submit', function(event) {
+    let password = document.getElementById('input_password').value;
+    let confirmPassword = document.getElementById('input_password_confirmation').value;
+    let confirmInput = document.getElementById('input_password_confirmation');
+    let errorMsg = document.getElementById('js-password-error');
+
+    // Cek apakah password dan konfirmasinya sama
+    if (password !== confirmPassword) {
+        event.preventDefault(); // Cegah form terkirim!
+        
+        // Munculkan tulisan merah
+        confirmInput.classList.add('is-invalid');
+        errorMsg.style.display = 'block';
+    } else {
+        // Hilangkan tulisan merah kalau sudah sama
+        confirmInput.classList.remove('is-invalid');
+        errorMsg.style.display = 'none';
+    }
+});
 </script>

@@ -44,12 +44,12 @@
                 </div>
                 <form id="formUploadDataPassport" action="{{ route('passport.update') }}">
                     @csrf
-                    <input type="hidden" id="res_id_passport" name="id">
+                    <input type="hidden" id="view_id_passport" name="id">
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-12 mb-4 text-center">
                                 <label class="form-label d-block fw-bold text-muted">Foto Passport</label>
-                                <img id="view_img_preview_passport" src="" class="img-fluid rounded border shadow-sm" style="max-height: 200px;" alt="preview Passport">
+                                <img id="view_img_preview_passport" src=""  class="img-fluid rounded border shadow-sm img-zoomable" style="max-height: 200px;" alt="preview Passport" onclick="toggleZoom(this)">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Country Code</label>
@@ -87,13 +87,12 @@
                                 <label class="form-label fw-bold">Date of Issue</label>
                                 <input type="date" class="form-control" id="view_tanggal_terbentuk" name="tanggal_terbentuk" readonly>
                             </div>
-                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Registration Number</label>
-                                <input type="text" class="form-control" id="view_no_reg" name="no_reg" readonly>
-                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" id="btn-download-pdf-passport">
+                            <i class="fas fa-file-pdf me-1"></i> Cetak PDF
+                        </button>
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Tutup</button>
                     </div>
                 </form>
@@ -110,19 +109,17 @@
         fetch(`/passport/edit/${id}`)
             .then(res => res.json())
             .then(data => {
-                // Masukkan ke ID yang ada di Modal VIEW Passport
+                // WAJIB ADA: Isi ID Hidden untuk keperluan PDF
+                document.getElementById('view_id_passport').value = data.id;
+
                 document.getElementById('view_img_preview_passport').src = window.location.origin + `/storage/${data.passport_image_path}`;
                 document.getElementById('view_kode_negara').value = data.kode_negara;
                 document.getElementById('view_no_paspor').value = data.no_paspor;
                 document.getElementById('view_nama_paspor').value = data.nama;
                 document.getElementById('view_kewarganegaraan_paspor').value = data.kewarganegaraan;
                 
-                // Set Radio Button View
-                if (data.jenis_kelamin === 'Male') {
-                    document.getElementById('view_jenis_kelamin_male').checked = true;
-                } else if(data.jenis_kelamin === 'Female') {
-                    document.getElementById('view_jenis_kelamin_female').checked = true;
-                }
+                // PERBAIKAN GENDER: Langsung tembak ke input text, bukan ke radio button
+                document.getElementById('view_jenis_kelamin_paspor').value = data.jenis_kelamin;
 
                 document.getElementById('view_tanggal_lahir_paspor').value = data.tanggal_lahir;
                 document.getElementById('view_tempat_lahir_paspor').value = data.tempat_lahir;
@@ -130,7 +127,7 @@
                 document.getElementById('view_tanggal_terbentuk').value = data.tanggal_terbentuk;
                 document.getElementById('view_no_reg').value = data.no_reg;
 
-                // Tampilkan Modal View Passport (Pastikan ID modalnya bener)
+                // Tampilkan Modal View Passport
                 new bootstrap.Modal(document.getElementById('modalViewDataPassport')).show();
             })
             .catch(err => {
@@ -143,7 +140,9 @@
         fetch(`/ktp/edit/${id}`)
             .then(res => res.json())
             .then(data => {
-                // Masukkan ke ID yang ada di Modal VIEW KTP
+                // WAJIB ADA: Isi ID Hidden untuk keperluan PDF KTP
+                document.getElementById('view_id_ktp').value = data.id;
+
                 document.getElementById('view_img_preview_ktp').src = window.location.origin + `/storage/${data.ktp_image_path}`;
                 document.getElementById('view_nik').value = data.nik;
                 document.getElementById('view_nama_ktp').value = data.nama;
@@ -152,9 +151,9 @@
                 document.getElementById('view_jenis_kelamin_ktp').value = data.jenis_kelamin;
                 document.getElementById('view_alamat').value = data.alamat;
                 
-                // ... (Lanjutkan isian data KTP lainnya) ...
+                // ... (Pastikan kamu melanjutkan isian data KTP lainnya di sini) ...
 
-                // Tampilkan Modal View KTP (Pastikan ID modalnya bener)
+                // Tampilkan Modal View KTP
                 new bootstrap.Modal(document.getElementById('modalViewDataKtp')).show();
             })
             .catch(err => {
@@ -163,4 +162,15 @@
             });
     }
 }
+document.getElementById('btn-download-pdf-passport').addEventListener('click', function() {
+    let inputPaspor = document.getElementById('view_id_passport');
+    
+    if (!inputPaspor || !inputPaspor.value) {
+        alert("Data Paspor belum siap atau ID tidak ditemukan!");
+        return;
+    }
+
+    let idPaspor = inputPaspor.value;
+    window.open('/passport/cetak-pdf/' + idPaspor, '_blank');
+});
 </script>

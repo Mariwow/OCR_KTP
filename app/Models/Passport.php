@@ -26,6 +26,12 @@ class Passport extends Model
         'note'
     ];
 
+    protected $casts = [
+        'no_paspor'    => 'encrypted',
+        'nama'         => 'encrypted',
+        'no_reg'       => 'encrypted',
+    ];
+
     public function Verified()
     {
         return $this->hasOne(PassportVerified::class, 'submission_id', 'id');

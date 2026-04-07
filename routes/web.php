@@ -5,6 +5,7 @@ use App\Http\Controllers\ReadKtpController;
 use App\Http\Controllers\PassportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KtpVerificationController;
 use Carbon\Carbon;
 use App\Models\ReadKtp;
 use App\Models\Passport;
@@ -92,5 +93,10 @@ Route::get('/rejectionArchive', [DashboardController::class, 'showRejectData'])-
 Route::post('/verify/restore/{id}/{type}', [DashboardController::class, 'restore'])->name('verify.reject');
 
 Route::put('/users/password/{id}', [AuthController::class, 'updatePassword'])->name('users.password.update');
+Route::put('/accountControl/update/{id}', [AuthController::class, 'update'])->name('account.update');
 
 Route::delete('/users/{id}', [AuthController::class, 'deleteAccount'])->name('users.destroy');
+
+Route::get('/ktp/cetak-pdf/{id}', [KtpVerificationController::class, 'cetakPdf'])->name('ktp.pdf');
+
+Route::get('/passport/cetak-pdf/{id}', [PassportController::class, 'cetakPdf'])->name('passport.pdf');

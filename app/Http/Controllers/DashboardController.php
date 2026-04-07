@@ -215,14 +215,17 @@ class DashboardController extends Controller
         return back()->with('success', 'Data berhasil ditolak dengan alasan: ' . $request->note);
     }
 
-    public function showReportAdmin()
+public function showReportAdmin()
     {
-
         $ktps = KtpVerified::with(['readKtp.user', 'user']) 
         ->latest()
         ->get()
         ->map(function ($item) {
             $item->type = 'KTP'; 
+            
+            // KUNCI PERBAIKAN: Timpa ID-nya dengan ID asli dari tabel ReadKtp!
+            $item->id = $item->readKtp->id; 
+            
             $item->display_name = $item->nama;
             $item->display_number = $item->nik;
             $item->setAttribute('image', $item->ktp_image_path);
@@ -241,6 +244,10 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($item) {
                 $item->type = 'PASSPORT'; 
+                
+                // KUNCI PERBAIKAN: Timpa ID-nya dengan ID asli dari tabel Passport Mentah!
+                $item->id = $item->passport->id; 
+                
                 $item->display_name = $item->nama;
                 $item->display_number = $item->no_paspor;
                 $item->setAttribute('image', $item->passport_image_path);

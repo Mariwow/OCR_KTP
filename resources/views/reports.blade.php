@@ -39,15 +39,15 @@
                         <label>Navigation</label>
                     </li>
                     <li class="nxl-item nxl-hasmenu">
-                        <a href="{{ route('scan') }}"  class="nxl-link">
-                            <span class="nxl-micon"><i class="fa-solid fa-chart-line"></i></span>
+                        <a href="{{ route('scan') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="fa-solid fa-camera"></i></span>
                             <span class="nxl-mtext">Scan</span>
                         </a>
                     </li>
                     <li class="nxl-item nxl-hasmenu">
-                        <a href="{{ route('reports') }}"  class="nxl-link">
-                            <span class="nxl-micon"><i class="fa-solid fa-chart-area"></i></i></span>
-                            <span class="nxl-mtext">Reports</span>
+                        <a href="{{ route('reports') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="fa-solid fa-chart-line"></i>   </span>
+                            <span class="nxl-mtext" >Reports</span>
                         </a>
                     </li>
                 </ul>
@@ -130,6 +130,7 @@
                                             <th>ID Number</th>
                                             <th>Type</th>
                                             <th>Uploaded At</th>
+                                            <th>Status</th>
                                             <th class="text-end">Actions</th>
                                         </tr>
                                     </thead>
@@ -153,6 +154,10 @@
                                                 </span>
                                             </td>
                                             <td>{{ $data->created_at->format('d/m/Y H:i') }}</td>
+                                            <td>
+                                                <span class="badge {{ $data->status == 'Verified' ? 'bg-success' : ($data->status == 'Done' ? 'bg-primary' : 'bg-warning') }}">{{ $data->status }}
+                                                </span>
+                                            </td>
                                             <td>
                                                 <div class="hstack gap-2 justify-content-end">
                                                     <button type="button" onclick="editDocument({{ $data->id }}, '{{ $data->type }}')" class="btn btn-sm btn-icon btn-outline-primary" title="Edit">

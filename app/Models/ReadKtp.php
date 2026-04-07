@@ -36,6 +36,18 @@ class ReadKtp extends Model
         'note'
     ];
 
+    protected $casts = [
+        'nik'          => 'encrypted',
+        'nama'         => 'encrypted',
+        'alamat'       => 'encrypted',
+        'rt_rw'        => 'encrypted',
+        'kel_desa'     => 'encrypted',
+        'kecamatan'    => 'encrypted',
+        'kabupaten'    => 'encrypted',
+        'provinsi'     => 'encrypted',
+        'ocr_raw_text' => 'encrypted' 
+    ];
+
     public function verified()
     {
         return $this->hasOne(KtpVerified::class, 'submission_id', 'id');

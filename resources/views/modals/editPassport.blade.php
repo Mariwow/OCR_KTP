@@ -31,7 +31,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Modal Edit Passport</title>
 </head>
 <body>
     <!-- Modal Data passport !-->
@@ -49,7 +49,7 @@
                         <div class="row">
                             <div class="col-12 mb-4 text-center">
                                 <label class="form-label d-block fw-bold text-muted">Foto Passport</label>
-                                <img id="res_img_preview_passport" src="" class="img-fluid rounded border shadow-sm" style="max-height: 200px;" alt="preview Passport">
+                                <img id="res_img_preview_passport" src="" class="img-fluid rounded border shadow-sm img-zoomable" style="max-height: 200px;" alt="preview Passport" onclick="toggleZoom(this)">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Country Code</label>
@@ -278,26 +278,34 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Birth Date</label>
-                                <input type="date" class="form-control" id="res_tanggal_lahir_paspor" name="tanggal_lahir" required>
+                            <div class="col-12 text-center mt-2 mb-3">
+                                <button class="btn btn-sm btn-outline-secondary rounded-pill px-4" type="button" data-bs-toggle="collapse" data-bs-target="#opsionalFields" aria-expanded="false" aria-controls="opsionalFields">
+                                    <i class="fas fa-chevron-down me-1"></i> Tampilkan Data Tambahan (Opsional)
+                                </button>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Place of Birth</label>
-                                <input type="text" class="form-control" id="res_tempat_lahir_paspor" name="tempat_lahir" required>
+                            <div class="collapse col-12" id="opsionalFields">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Birth Date</label>
+                                        <input type="date" class="form-control" id="res_tanggal_lahir_paspor" name="tanggal_lahir">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Place of Birth</label>
+                                        <input type="text" class="form-control" id="res_tempat_lahir_paspor" name="tempat_lahir">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Expire Date</label>
+                                        <input type="date" class="form-control" id="res_masa_berlaku" name="masa_berlaku">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Date of Issue</label>
+                                        <input type="date" class="form-control" id="res_tanggal_terbentuk" name="tanggal_terbentuk">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Expire Date</label>
-                                <input type="date" class="form-control" id="res_masa_berlaku" name="masa_berlaku" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Date of Issue</label>
-                                <input type="date" class="form-control" id="res_tanggal_terbentuk" name="tanggal_terbentuk" required>
-                            </div>
-                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Registration Number</label>
-                                <input type="text" class="form-control" id="res_no_reg" name="no_reg" required>
-                            </div>
+            
+                           
+                            
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -315,9 +323,8 @@
 
 <script>
     $(document).ready(function() {
-        // Sulap ID res_kewarganegaraan_paspor menjadi Select2 yang aman untuk modal
         $('#res_kewarganegaraan_paspor').select2({
-            dropdownParent: $('#modalInputDataPassport'), // Sesuaikan dengan ID modal kamu
+            dropdownParent: $('#res_kewarganegaraan_paspor').parent(),  
             width: '100%',
             placeholder: "-- Pilih Negara / Kewarganegaraan --"
         });

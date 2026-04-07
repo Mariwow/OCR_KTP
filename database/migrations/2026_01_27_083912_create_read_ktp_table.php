@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('read_ktp', function (Blueprint $table) {
             $table->id();
 
-            $table->string('nik', 16)->nullable();
+            $table->string('nik')->nullable();
             $table->string('nama')->nullable();
             $table->string('tempat_lahir')->nullable();
             $table->date('tanggal_lahir')->nullable();
             $table->string('jenis_kelamin', 20)->nullable();
             $table->string('alamat')->nullable();
-            $table->string('rt_rw', 10)->nullable();
+            $table->string('rt_rw')->nullable();
             $table->string('kel_desa')->nullable();
             $table->string('kecamatan')->nullable();
             $table->string('kabupaten')->nullable();

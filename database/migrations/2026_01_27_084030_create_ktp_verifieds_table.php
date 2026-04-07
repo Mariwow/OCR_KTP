@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('submission_id'); 
 
-            $table->string('nik', 20);
+            $table->string('nik');
             $table->string('nama');
             $table->string('tempat_lahir');
             $table->date('tanggal_lahir'); 
             $table->string('jenis_kelamin', 20);
             $table->string('alamat');
-            $table->string('rt_rw', 10);
+            $table->string('rt_rw');
             $table->string('kel_desa');
             $table->string('kecamatan');
             $table->string('kabupaten')->nullable();

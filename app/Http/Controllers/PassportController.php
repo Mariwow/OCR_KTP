@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Passport;
+use App\Models\PassportVerified;
 use Illuminate\Support\Facades\Storage;
 use Carbon\carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PassportController extends Controller
 {
@@ -47,11 +49,11 @@ class PassportController extends Controller
             'nama'              => 'required|string',
             'kewarganegaraan'   => 'required|string',
             'jenis_kelamin'     => 'required|string',
-            'tanggal_lahir'     => 'required|date',
-            'tempat_lahir'      => 'required|string',
-            'masa_berlaku'      => 'required|date',
-            'tanggal_terbentuk' => 'required|date',
-            'no_reg'            => 'required|string',
+            'tanggal_lahir'     => 'nullable|date',
+            'tempat_lahir'      => 'nullable|string',
+            'masa_berlaku'      => 'nullable|date',
+            'tanggal_terbentuk' => 'nullable|date',
+            'no_reg'            => 'nullable|string',
         ]);
 
         $passport->update(array_merge($validated, ['status' => 'Verified']));
@@ -65,5 +67,15 @@ class PassportController extends Controller
     public function edit($id) 
     {
     return response()->json(Passport::findOrFail($id));
+    }
+
+    public function cetakPdf($id)
+    {
+        $passport = \App\Models\PassportVerified::where('submission_id', $id)->firstOrFail();
+
+        $pdf = Pdf::loadView('pdf.cetak_passport', ['passport' => $passport]);
+        $pdf->setPaper('A4', 'portrait');
+
+        return $pdf->download('Data_Paspor_' . $passport->nama . '.pdf');
     }
 }

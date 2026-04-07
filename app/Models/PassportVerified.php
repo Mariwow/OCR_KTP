@@ -25,6 +25,12 @@ class PassportVerified extends Model
         'verified_by'
     ];
 
+    protected $casts = [
+        'no_paspor'    => 'encrypted',
+        'nama'         => 'encrypted',
+        'no_reg'       => 'encrypted',
+    ];
+
     public function Passport()
     {
         return $this->belongsTO(Passport::class, 'submission_id', 'id');

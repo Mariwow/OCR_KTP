@@ -81,7 +81,7 @@ window.handleUpload = function(){
             formData.append('ktp_image_path', blob, 'ktp_scan.jpg');
             formData.append('source', 'camera');
             window.processRequest(formData, btnSave, originalText);
-        }, 'image/jpg', 0.7);
+        }, 'image/jpeg', 0.7);
     }
     else if (fileInput && fileInput.files.length > 0){
         formData.append('ktp_image_path', fileInput.files[0]);
@@ -237,14 +237,14 @@ window.processRequest = function(formData, btn, originalText) {
     .then(res => res.json())
     .then(data => {
         if(data.status === 'success'){
-            const uploadModalEl = document.getElementById('modalUploadKTP');
-            if(uploadModalEl) bootstrap.Modal.getInstance(uploadModalEl)?.hide();
-            
             const ocr = data.data.ocr_data;
             const imgPreview = document.getElementById('res_img_preview');
             if (data.data.path && imgPreview) imgPreview.src = `/storage/${data.data.path}`;
 
-            const fields = ['id', 'nik', 'nama', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'alamat', 'rt_rw', 'kecamatan', 'kabupaten', 'provinsi', 'agama', 'status_perkawinan', 'pekerjaan', 'kewarganegaraan', 'berlaku_sampai'];
+            // 1. ISI DATA INPUT TEKS BIASA
+            // Hapus jenis_kelamin, provinsi, dan agama dari daftar array ini!
+            const fields = ['id', 'nik', 'nama', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'rt_rw', 'kel_desa', 'kecamatan', 'kabupaten', 'status_perkawinan', 'pekerjaan', 'kewarganegaraan', 'berlaku_sampai'];
+            
             fields.forEach(field => {
                 const el = document.getElementById(`res_${field}`);
                 if(el) {
@@ -253,6 +253,34 @@ window.processRequest = function(formData, btn, originalText) {
                 }
             });
 
+            // ==========================================
+            // 2. TENDANG KHUSUS SELECT2 (Provinsi & Agama)
+            // ==========================================
+            if (ocr?.provinsi) {
+                $('#res_provinsi').val(ocr.provinsi.trim().toUpperCase()).trigger('change');
+            } else {
+                $('#res_provinsi').val('').trigger('change');
+            }
+
+            if (ocr?.agama) {
+                $('#res_agama').val(ocr.agama.trim().toUpperCase()).trigger('change');
+                // Auto-buka tab opsional biar agamanya langsung kelihatan!
+                $('#opsionalFields').collapse('show'); 
+            } else {
+                $('#res_agama').val('').trigger('change');
+            }
+
+            // ==========================================
+            // 3. CENTANG KHUSUS RADIO (Jenis Kelamin)
+            // ==========================================
+            if (ocr?.jenis_kelamin) {
+                let cleanGender = ocr.jenis_kelamin.trim().toUpperCase();
+                // Cari radio button berdasarkan name dan value, BUKAN berdasarkan ID
+                let genderRadio = document.querySelector(`input[name="jenis_kelamin"][value="${cleanGender}"]`);
+                if (genderRadio) genderRadio.checked = true;
+            }
+
+            // Tampilkan Modalnya
             const resultModalEl = document.getElementById('modalResultOCR');
             if(resultModalEl) new bootstrap.Modal(resultModalEl).show();
         } else {
@@ -321,18 +349,57 @@ window.editDocument = function(id, type) {
                 mapId('res_nama', data.nama);
                 mapId('res_tempat_lahir', data.tempat_lahir);
                 mapId('res_tanggal_lahir', data.tanggal_lahir);
-                mapId('res_jenis_kelamin', data.jenis_kelamin);
                 mapId('res_alamat', data.alamat);
                 mapId('res_kel_desa', data.kel_desa);
                 mapId('res_rt_rw', data.rt_rw);
                 mapId('res_kecamatan', data.kecamatan);
-                mapId('res_kabupaten', data.kabupaten);
-                mapId('res_provinsi', data.provinsi);
-                mapId('res_agama', data.agama);
+                mapId('res_kabupaten', data.kabupaten); 
                 mapId('res_status_perkawinan', data.status_perkawinan);
                 mapId('res_pekerjaan', data.pekerjaan);
                 mapId('res_kewarganegaraan', data.kewarganegaraan);
                 mapId('res_berlaku_sampai', data.berlaku_sampai);
+
+               if (data.provinsi) {
+                    let provSelect = document.querySelector('#formUpdateKtp #res_provinsi');
+                    if (provSelect) {
+                        provSelect.value = data.provinsi.trim().toUpperCase();
+                        
+                        // KUNCI PENTING: Trigger 'change' ini yang menyembuhkan "Teks Ungu" / nge-blank
+                        provSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        
+                        // Kalau kebetulan abang pakai jQuery Select2, ini backup-nya:
+                        if (window.jQuery) $('#res_provinsi').trigger('change'); 
+                    }
+                }
+                if (data.agama) {
+                    let agamaSelect = document.querySelector('#formUpdateKtp #res_agama');
+                    if (agamaSelect) {
+                        agamaSelect.value = data.agama.trim().toUpperCase();
+                        agamaSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        if (window.jQuery) $('#res_agama').trigger('change');
+                    }
+
+                    // BUKA OTOMATIS COLLAPSE OPSIONAL
+                    // Biar kalau agamanya keisi, kotaknya langsung kebuka dan abang bisa lihat!
+                    let opsionalTab = document.getElementById('opsionalFields');
+                    if (opsionalTab && !opsionalTab.classList.contains('show')) {
+                        // Pakai fungsi bawaan Bootstrap buat buka collapse
+                        new bootstrap.Collapse(opsionalTab, {toggle: false}).show();
+                    }
+                }
+                if (data.jenis_kelamin) {
+                    let cleanGender = data.jenis_kelamin.trim().toUpperCase();
+                    
+                    // KUNCI: Cari HANYA radio button yang ada di dalam formUpdateKtp
+                    let genderRadio = document.querySelector(`#formUpdateKtp input[name="jenis_kelamin"][value="${cleanGender}"]`);
+                    
+                    if (genderRadio) {
+                        genderRadio.checked = true;
+                    } else {
+                        // Kalau masih gagal juga, ini bakal lapor di Console Browser
+                        console.error("Radio button untuk " + cleanGender + " tidak ditemukan di dalam Form!");
+                    }
+                }
 
                 const prevImg = document.getElementById('res_img_preview');
                 if(prevImg) prevImg.src = window.location.origin + `/storage/${data.ktp_image_path}`;
@@ -353,6 +420,7 @@ window.viewDocument = function(id, type) {
             .then(data => {
                 const mapId = (elId, val) => { const el = document.getElementById(elId); if(el) el.value = val; };
                 
+                mapId('view_id_passport', data.id);
                 mapId('view_kode_negara', data.kode_negara);
                 mapId('view_no_paspor', data.no_paspor);
                 mapId('view_nama_paspor', data.nama);
@@ -379,6 +447,7 @@ window.viewDocument = function(id, type) {
             .then(data => {
                 const mapId = (elId, val) => { const el = document.getElementById(elId); if(el) el.value = val; };
                 
+                mapId('view_id_ktp', data.id);
                 mapId('view_nik', data.nik);
                 mapId('view_nama_ktp', data.nama);
                 mapId('view_tempat_lahir_ktp', data.tempat_lahir);
@@ -537,6 +606,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 btnSubmit.innerHTML = originalBtnText;
             });
         });
+    }
+});
+
+function toggleZoom(imgElement) {
+    // Toggle class untuk efek zoom
+    imgElement.classList.toggle('img-zoomed');
+    
+    // Cari semua elemen Select2 di halaman
+    let select2Boxes = document.querySelectorAll('.select2-container');
+    
+    // Looping untuk menyembunyikan/memunculkan Select2
+    select2Boxes.forEach(box => {
+        if (imgElement.classList.contains('img-zoomed')) {
+            // Kalau foto lagi di-zoom, Select2 disembunyikan sementara
+            box.style.visibility = 'hidden'; 
+            box.style.opacity = '0';
+        } else {
+            // Kalau foto balik normal, Select2 dimunculkan lagi
+            box.style.visibility = 'visible';
+            box.style.opacity = '1';
+        }
+    });
+}
+
+document.getElementById('btn-download-pdf').addEventListener('click', function() {
+    // Ambil ID KTP dari input hidden yang ada di dalam modal
+    let idKtp = document.getElementById('view_id_ktp').value;
+    
+    if(idKtp) {
+        // Buka tab baru yang mengarah ke rute pembuat PDF di Laravel
+        window.open('/ktp/cetak-pdf/' + idKtp, '_blank');
+    } else {
+        alert('Data KTP belum siap atau ID tidak ditemukan!');
     }
 });
 </script>

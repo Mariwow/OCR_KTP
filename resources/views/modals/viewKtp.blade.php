@@ -44,12 +44,12 @@
                 </div>
                 <form id="formUpdateKtp" action="{{ route('passport.update') }}">
                     @csrf
-                    <input type="hidden" id="res_id" name="id">
+                    <input type="hidden" id="view_id_ktp" name="id">
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-12 mb-4 text-center">
                                 <label class="form-label d-block fw-bold text-muted">Foto KTP</label>
-                                <img id="view_img_preview_ktp" src="" class="img-fluid rounded border shadow-sm" style="max-height: 200px;" alt="preview KTP">
+                                <img id="view_img_preview_ktp" src=""  class="img-fluid rounded border shadow-sm img-zoomable" style="max-height: 200px;" alt="preview KTP" onclick="toggleZoom(this)">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">NIK</label>
@@ -118,6 +118,9 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" id="btn-download-pdf">
+                            <i class="fas fa-file-pdf me-1"></i> Cetak PDF
+                        </button>
                         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Tutup</button>
                     </div>
                 </form>

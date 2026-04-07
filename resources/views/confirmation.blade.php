@@ -446,6 +446,8 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="assets/vendors/js/select2.min.js"></script>
+    <script src="assets/vendors/js/select2-active.min.js"></script>
     <script>
         $(document).ready(function() {
             $('#myTable').DataTable({
@@ -454,7 +456,29 @@
                 "info": true      // Menampilkan tulisan "Showing 1 to 10 of 50 entries"
             });
         });
+$(document).ready(function() {
+    // Aktifkan Select2 untuk Provinsi KTP
+    $('#res_provinsi').select2({
+        dropdownParent: $('#res_provinsi').parent(), 
+        width: '100%',
+        placeholder: "-- Cari & Pilih Provinsi --"
+    });
+    $('#res_agama').select2({
+        dropdownParent: $('#res_agama').parent(), 
+        width: '100%',
+        placeholder: "-- Pilih Agama --"
+    });
+        $(document).ready(function() {
+        // Sulap ID res_kewarganegaraan_paspor menjadi Select2 yang aman untuk modal
+        $('#res_kewarganegaraan_paspor').select2({
+            dropdownParent: $('#res_kewarganegaraan_paspor').parent(),  // Sesuaikan dengan ID modal kamu
+            width: '100%',
+            placeholder: "-- Pilih Negara / Kewarganegaraan --"
+        });
+    });
+});
     </script>
+    
 
 </body>
 </html>

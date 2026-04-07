@@ -18,7 +18,14 @@ class AuthController extends Controller
             'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role'     => 'required|in:admin,fo', // Hanya boleh admin atau fo
-        ]);
+        ], [
+        // Ubah pesan error ke bahasa yang mudah dimengerti
+        'email.unique' => 'Email ini sudah terdaftar, silakan gunakan email lain!',
+        'password.confirmed' => 'Konfirmasi password tidak cocok!',
+        'password.min' => 'Password minimal harus 8 karakter!'
+         ]);
+
+         $validator->validate();
 
         // 2. Buat User Baru (Password otomatis Bcrypt via Hash::make)
         $user = User::create([
@@ -79,27 +86,39 @@ class AuthController extends Controller
         return view('accountControl', compact('users'));
     }
 
-    public function updatePassword(Request $request, $id)
+    public function update(Request $request, $id)
     {
+        // 1. Validasi Input
         $request->validate([
-            'old_password' => 'required',
-            'new_password' => 'required|min:8|confirmed', 
+            'name'     => 'required|string|max:255',
+            // Validasi email harus mengabaikan ID user ini agar tidak dianggap duplikat oleh dirinya sendiri
+            'email'    => 'required|string|email|max:255|unique:users,email,' . $id, 
+            'role'     => 'required|in:admin,fo',
+            // Password dibuat nullable (boleh kosong)
+            'password' => 'nullable|string|min:8|confirmed', 
         ], [
-            'new_password.min' => 'Password baru minimal harus 8 karakter.',
-            'new_password.confirmed' => 'Konfirmasi password baru tidak cocok.'
+            'email.unique'       => 'Email ini sudah terdaftar!',
+            'password.confirmed' => 'Konfirmasi password baru tidak cocok!',
+            'password.min'       => 'Password baru minimal harus 8 karakter!'
         ]);
 
+        // 2. Ambil data user
         $user = User::findOrFail($id);
 
-        if (!Hash::check($request->old_password, $user->password)) {
-            return back()->with('error', 'Password lama yang Anda masukkan salah!');
+        // 3. Update informasi dasar
+        $user->name  = $request->name;
+        $user->email = $request->email;
+        $user->role  = $request->role;
+
+        // 4. Update password HANYA jika form password diisi
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
         }
 
-        $user->update([
-            'password' => Hash::make($request->new_password)
-        ]);
+        // 5. Simpan ke database
+        $user->save();
 
-        return back()->with('success', 'Password berhasil diubah!');
+        return redirect()->back()->with('success', 'Data akun berhasil diperbarui!');
     }
 
     public function deleteAccount($id)

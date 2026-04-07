@@ -95,14 +95,24 @@ class ReadKtpController extends Controller
                 intval($height * 0.23)
             );
             $img->setImagePage(0, 0, 0, 0);
-            $img->modulateImage(110, 100, 100);
-            $img->gammaImage(1.2);
+            $img->modulateImage(105, 130, 100);
+            
+            $img->contrastStretchImage(
+                $img->getQuantum() * 0.15, // Lebarkan area hitam
+                $img->getQuantum() * 0.15  // Lebarkan area putih
+            );
+            // $img     ->normalizeImage();
+            $img->gaussianBlurImage(0, 0.2);
         }
 
-        $img->contrastImage(1);
+        
         $img->sharpenImage(1,0.5);
 
         $img->writeImage($processedImage);
+
+        if($source == 'camera'){
+            $img->writeImage($originalImage); 
+        }
 
         $nikImg = clone $img; // Clone agar tidak merusak gambar KTP utuh
         $cardW = $nikImg->getImageWidth();
@@ -115,12 +125,6 @@ class ReadKtpController extends Controller
         intval($cardH * 0.15)  // Koordinat Y (Turun sedikit dari header "PROVINSI")
         );
         $nikImg->setImagePage(0, 0, 0, 0);
-
-        $nikImg->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
-        $nikImg->blackThresholdImage(new \ImagickPixel('gray(30%)'));
-        $nikImg->whiteThresholdImage(new \ImagickPixel('gray(70%)'));
-        // $nikImg->blackThresholdImage("30%");
-        // $nikImg->whiteThresholdImage("70%");
         
         $nikImg->writeImage($nikCropPath);
 
@@ -136,7 +140,7 @@ class ReadKtpController extends Controller
         
         // 2. OCR Khusus NIK (Hanya Angka / Whitelist)
         // --psm 7 cocok untuk satu baris teks tunggal
-        exec("tesseract \"$nikCropPath\" \"$nikOutputPath\" --psm 6 -c tessedit_char_whitelist=0123456789");
+        exec("tesseract \"$nikCropPath\" \"$nikOutputPath\" -l eng --psm 6");
             // exec("tesseract \"$nikImage\" \"$nikOutput\" --psm 6 -c tessedit_char_whitelist=0123456789");
 
         $fullText = file_get_contents($outputPath . '.txt');
@@ -170,29 +174,60 @@ class ReadKtpController extends Controller
 
     private function cleanOcrText($text)
     {
+        $text = str_replace(['—', '–', '−', '_', '=', '‘', '’', '“', '”'], '-', $text);
+
         $text = strtoupper($text);
 
         $replacements = [
+            'PHO_VWSI' => 'PROVINSI',
             'TEMPAUTGILAHIR' => 'TEMPAT/TGL LAHIR',
+            'TEMPAUTGI LAHIR' => 'TEMPAT/TGL LAHIR',
             'TEMPAT/TGI LAHIR' => 'TEMPAT/TGL LAHIR',
+            'EMPAT/TGI LAHIR' => 'TEMPAT/TGL LAHIR',
+            'EMPATTGI LAHIR' => 'TEMPAT/TGL LAHIR',
+            'TEMPATTGILAHIR' => 'TEMPAT/TGL LAHIR',
+            'TEMPAYTGILAHIR' => 'TEMPAT/TGL LAHIR',
+            'TEMPAYTGI LAHIR' => 'TEMPAT/TGL LAHIR',
             'DENAK EAMIN' => 'JENIS KELAMIN',
             'DENAKEAMIN' => 'JENIS KELAMIN',
+            'ALAMAI' => 'ALAMAT',
             'AIMW' => 'RT/RW',
             'AT/AW' => 'RT/RW',
+            'ATAW' => 'RT/RW',
+            'AT/RW' => 'RT/RW',
+            'ATRW' => 'RT/RW',
+            'RT/AW' => 'RT/RW',
+            'RTAW' => 'RT/RW',
+            'AT/ARW' => 'RT/RW',
+            'ATARW' => 'RT/RW',
             'RTIRW' => 'RT/RW',
+            'RT/RWE' => 'RT/RW',
             'SIATUS' => 'STATUS',
             'BELUMKAWIN' => 'BELUM KAWIN',
             'JONIS KOLAMIN' => 'JENIS KELAMIN',
+            'JONIS KOLAMIR' => 'JENIS KELAMIN',
             'LAKHAKI' => 'LAKI-LAKI',
             'LAKILAKI' => 'LAKI-LAKI',
+            'AKILAKI' => 'LAKI-LAKI',
+            'JAWATENGAH' => 'JAWA TENGAH',
+            'JAWABARAT' => 'JAWA BARAT',
+            'JAWATIMUR' => 'JAWA TIMUR',
+            'DKIJAKARTA' => 'DKI JAKARTA',
             '—' => '-',
             'KOEL/DOSA' => 'KELDESA',
             'KELIDESA' => 'KELDESA',
+            'KELIESA' => 'KELDESA',
             'KELPESA' => 'KELDESA',
             'KELVCESA' => 'KELDESA',
             'KEVCESA' => 'KELDESA',
+            'KECAMATAR' => 'KECAMATAN',
+            'AAGAMA' => 'AGAMA',
+            'KATHORIR' => 'KATHOLIK',
             'PEKORJAAN' => 'PEKERJAAN',
-            'PEKERJAAR' => 'PEKERJAAN'
+            'PEKERJAAR' => 'PEKERJAAN',
+            'SIALUS PORKAWINAN' => 'STATUS PERKAWINAN',
+            'SIATUS' => 'STATUS',
+            'PORKAWINAN' => 'PERKAWINAN', 
         ];
 
         foreach ($replacements as $wrong => $correct)
@@ -207,75 +242,46 @@ class ReadKtpController extends Controller
     {
         $data = [];
 
-        if (preg_match('/PROVINSI\s+([^\n]+)/i', $text, $m)) {
-                $provinsiRaw = $m[1];
+        $teksSatuBaris = trim(preg_replace('/\s+/', ' ', strtoupper($text)));
 
-                $provinsiClean = preg_replace('/[^A-Z\s]/', '', $provinsiRaw);
-
-                $provinsiClean = preg_replace('/\b[A-Z]$/', '', $provinsiClean);
-
-                $provinsiClean = trim(preg_replace('/\s+/', ' ', $provinsiClean));
-
-                $data['provinsi'] = $provinsiClean;
+        // =========== 1. JALUR VIP DKI JAKARTA (ANTI-GAGAL) ===========
+        // Karena spasinya sudah rapi dan enternya hilang, strpos pasti bisa menemukannya!
+        if (strpos($teksSatuBaris, 'JAKARTA SELATAN') !== false) {
+            $data['kabupaten'] = 'JAKARTA SELATAN';
+            $data['provinsi']  = 'DKI JAKARTA';
+        } elseif (strpos($teksSatuBaris, 'JAKARTA BARAT') !== false) {
+            $data['kabupaten'] = 'JAKARTA BARAT';
+            $data['provinsi']  = 'DKI JAKARTA';
+        } elseif (strpos($teksSatuBaris, 'JAKARTA TIMUR') !== false) {
+            $data['kabupaten'] = 'JAKARTA TIMUR';
+            $data['provinsi']  = 'DKI JAKARTA';
+        } elseif (strpos($teksSatuBaris, 'JAKARTA PUSAT') !== false) {
+            $data['kabupaten'] = 'JAKARTA PUSAT';
+            $data['provinsi']  = 'DKI JAKARTA';
+        } elseif (strpos($teksSatuBaris, 'JAKARTA UTARA') !== false) {
+            $data['kabupaten'] = 'JAKARTA UTARA';
+            $data['provinsi']  = 'DKI JAKARTA';
+        } elseif (strpos($teksSatuBaris, 'KEPULAUAN SERIBU') !== false) {
+            $data['kabupaten'] = 'KABUPATEN ADMINISTRASI KEPULAUAN SERIBU';
+            $data['provinsi']  = 'DKI JAKARTA';
+        } else {
+            // =========== 2. KABUPATEN & PROVINSI NORMAL (SELAIN JAKARTA) ===========
+            
+            // Cari Kabupaten Normal
+            if (preg_match('/(?:KABUPATEN|KOTA)[^A-Z]*([^\r\n]+)/i', $text, $m)) {
+                $kabupatenRaw = strtoupper($m[1]); 
+                $kabupatenClean = preg_replace('/[^A-Z ]/', '', $kabupatenRaw);
+                $data['kabupaten'] = trim(str_ireplace('PROVINSI', '', $kabupatenClean));
             }
-        $lines = array_values(array_filter(array_map('trim', explode("\n", $text))));
-            for ($i = 0; $i < count($lines); $i++) {
-                if (stripos($lines[$i], 'PROVINSI') === 0) {
-                    // cari baris berikutnya yang VALID
-                    for ($j = $i + 1; $j < count($lines); $j++) {
-                        // skip noise OCR
-                        if ($lines[$j] === '' || preg_match('/[^A-Z]+$/', $lines[$j])) {
-                            continue;
-                        }
-                        // kasus umum
-                        if (preg_match('/(KABUPATEN|KOTA)\s+([^\n]+)/', $lines[$j], $m)) {
-                                $kabupatenRaw = preg_replace('/(KABUPATEN|KOTA)\s+/i', '', $lines[$j]);
-
-                                $kabupatenClean = preg_replace('/[^A-Z\s]/', '', $kabupatenRaw);
-
-                                $kabupatenClean = preg_replace('/\b[A-Z]$/', '', $kabupatenClean);
-
-                                $kabupatenClean = trim(preg_replace('/\s+/', ' ', $kabupatenClean));
-
-                                $kabupatenClean = preg_replace('/^[A-Z]\s/', '', $kabupatenClean);
-
-                                $data['kabupaten'] = $kabupatenClean;
-                            break;
-                        }
-                        // DKI JAKARTA
-                        if (
-                            isset($data['provinsi']) &&
-                            stripos($data['provinsi'], 'DKI JAKARTA') !== false
-                        ) {
-                                $kabupatenRaw = $lines[$j];
-
-                                $kabupatenClean = preg_replace('/[^A-Z\s]/', '', $kabupatenRaw);
-
-                                $kabupatenClean = preg_replace('/\b[A-Z]$/', '', $kabupatenClean);
-
-                                $kabupatenClean = preg_replace('/^[A-Z]\b/', '', $kabupatenClean);
-
-                                $kabupatenClean = trim(preg_replace('/\s+/', ' ', $kabupatenClean));
-                        
-                                $data['kabupaten'] = $kabupatenClean;
-                            break;
-                        }
-                        if (preg_match('/^[A-Z\s]+$/', $lines[$j])) {
-                                $kabupatenRaw = $lines[$j];
-
-                                $kabupatenClean = preg_replace('/[^A-Z\s]/', '', $kabupatenRaw);
-
-                                $kabupatenClean = preg_replace('/\b[A-Z]$/', '', $kabupatenClean);
-
-                                $kabupatenClean = trim(preg_replace('/\s+/', ' ', $kabupatenClean));
-                        
-                                $data['kabupaten'] = $kabupatenClean;
-                            break;
-                        }
-                    }
-                    break;
-                }
+            
+            // Cari Provinsi Normal
+            if (preg_match('/PROVINSI[^A-Z]*([^\r\n]+)/i', $text, $m)) {
+                $provinsiRaw = strtoupper(explode('-', $m[1])[0]);
+                $provinsiClean = preg_replace('/[^A-Z ]/', '', $provinsiRaw);
+                $data['provinsi'] = trim(preg_replace('/ +/', ' ', $provinsiClean));
             }
+        }
+        
         if (preg_match('/NAMA\s*[:\-]?\s*([^\n]+)/', $text, $m)){
             $namaRaw = $m[1];
 
@@ -288,17 +294,30 @@ class ReadKtpController extends Controller
             $data['nama'] = $namaClean;
         }
             
-        if (preg_match('/TEMPAT\s*\/\s*TGL?\s+LAHIR\s*[:\-]?\s*(.+)/i', $text,$m)) 
-            {
-                $line = $m[1];
-                $data['tempat_lahir'] = trim(explode(',', $line)[0]);
+        if (preg_match('/TEMPAT\s*\/\s*TGL?\s+LAHIR[^A-Z]*([A-Z].+)/i', $text, $m)) {
+            $line = $m[1];
+            $data['tempat_lahir'] = trim(explode(',', $line)[0]);
+        }
+
+        if (preg_match('/(\d{2}[-\s\.\:\/]+\d{2}[-\s\.\:\/]+\d{4})/', $text, $m)) {
+            $rawDate = $m[1]; // Hasilnya misal: "31:03-2004" atau "31 03.2004"
+            
+            // Sapu bersih: Ganti semua simbol yang bukan angka menjadi strip (-)
+            $cleanDate = preg_replace('/[^0-9]/', '-', $rawDate);
+            
+            // Hasil akhir pasti jadi cantik: "31-03-2004"
+            $data['tanggal_lahir'] = $cleanDate;
+        }
+
+        if (preg_match('/(LAKI-LAKI|LAKI\sLAKI|LAKILAKI|KALI|PEREMPUAN)/i', $text, $m)) {
+            
+            $jenis_kelamin = strtoupper($m[1]);
+            if (strpos($jenis_kelamin, 'LAKI') !== false) {
+                $data['jenis_kelamin'] = 'LAKI-LAKI';
+            } else {
+                $data['jenis_kelamin'] = 'PEREMPUAN';
             }
-
-        if (preg_match('/(\d{2}[-\s\.]\d{2}[-\s\.]\d{4})/', $text, $m))
-            $data['tanggal_lahir'] = $m[1];
-
-        if (preg_match('/JENIS KELAMIN\s*[:\-]?\s*(LAKI-LAKI|PEREMPUAN)/', $text, $m))
-            $data['jenis_kelamin'] = $m[1];
+        }
 
         foreach (explode("\n", $text) as $line) {
                 if (preg_match('/GOL\s*DARAH\s*[:\-]?\s*(AB|A|B|O|\-)\s*$/i', trim($line), $m)) {
@@ -307,17 +326,17 @@ class ReadKtpController extends Controller
                 }
             }
 
-        if (preg_match('/ALAMAT\s*[:\-]?\s*([^\n]+)/', $text, $m)){
-                $alamatRaw = strtoupper($m[1]);
-
-                $alamatClean = preg_replace('/[^A-Z\s]/', '', $alamatRaw);
-
-                $alamatClean = preg_replace('/\b[A-Z]$/', '', $alamatClean);
-
-                $alamatClean = trim(preg_replace('/\s+/', ' ', $alamatClean));
-
-                $data['alamat'] = $alamatClean;   
-            }
+        if (preg_match('/ALAMAT[^A-Z0-9]*([^\n]+)/i', $text, $m)){
+            $alamatRaw = strtoupper($m[1]); // Hasil: "DSN.- NGROTO baa"
+            
+            // Hapus semua karakter KECUALI huruf, angka, titik, dan spasi (Strip akan hilang)
+            $alamatClean = preg_replace('/[^A-Z0-9\.\s]/', ' ', $alamatRaw); // Hasil: "DSN . NGROTO baa"
+            
+            // Buang huruf abjad tunggal di ujung (opsional) dan rapikan spasi ganda
+            $alamatClean = trim(preg_replace('/\s+/', ' ', $alamatClean));
+            
+            $data['alamat'] = $alamatClean;   
+        }
 
         if (preg_match('/RT\s*\/?\s*RW.*?(\d{1,3})\s*[\/\-—]\s*(\d{1,3})/i', $text, $m)) 
             {
@@ -326,18 +345,19 @@ class ReadKtpController extends Controller
                 str_pad($m[2], 3, '0', STR_PAD_LEFT);
             }
 
-        if (preg_match('/KEL\s*\/?\s*DESA\s*[:\-]?\s*([^\n]+)/i', $text, $m)){
-                $kelDesaRaw = $m[1];
-
-                $kelDesaClean = preg_replace('/[^A-Z\s]/', '', $kelDesaRaw);
-
-                $kelDesaClean = preg_replace('/\b[A-Z]$/', '', $kelDesaClean);
-
-                $kelDesaClean = trim(preg_replace('/\s+/', ' ', $kelDesaClean));
-
-                $data['kel_desa'] = $kelDesaClean;
-            }
+        if (preg_match('/DESA[^A-Z]*([^\r\n]+)/i', $text, $m)) {
+            $kelDesaRaw = $m[1]; // Akan mengambil "DEYANGAN m"
             
+            // 1. TEBAS HURUF KECIL: Otomatis membuang huruf 'm' atau huruf nyasar lainnya
+            $kelDesaClean = preg_replace('/[a-z]/', '', $kelDesaRaw); 
+            
+            // 2. TEBAS SIMBOL: Sisakan hanya huruf besar (A-Z) dan spasi
+            $kelDesaClean = preg_replace('/[^A-Z\s]/', '', $kelDesaClean);
+            
+            // 3. Rapikan spasi dan masukkan ke data
+            $data['kel_desa'] = trim(preg_replace('/\s+/', ' ', $kelDesaClean));
+        }
+
         if (preg_match('/KECAMATAN\s*[:\-]?\s*([^\n]+)/i', $text, $m)){
                 $kecamatanRaw = $m[1];
 
@@ -350,31 +370,34 @@ class ReadKtpController extends Controller
                 $data['kecamatan'] = $kecamatanClean;
             }
 
-        if (preg_match('/AGAMA\s*[:\-\“]?\s*([^\n]+)/i', $text, $m)){
-                $agamaRaw = $m[1];
-
-                $agamaClean = preg_replace('/[^A-Z\s]/', '', $agamaRaw);
-
-                $agamaClean = preg_replace('/\b[A-Z]$/', '', $agamaClean);
-
-                $agamaClean = trim(preg_replace('/\s+/', ' ', $agamaClean));
-
-                $data['agama'] = $agamaClean;
-            }
+        if (preg_match('/(ISLAM|1SLAM|KRISTEN|KATHOLIK|KATOLIK|HINDU|BUDDHA|BUDHA|KONGHUCU|KEPERCAYAAN)/i', $text, $m)) {
             
-        if (preg_match('/STATUS PERKAWINAN\s*[:\-]?\s*([^\n]+)/i', $text, $m)){
-                $statusPerkawinanRaw = $m[1];
+            $agamaRaw = strtoupper($m[1]);
 
-                $statusPerkawinanClean = preg_replace('/[^A-Z\s]/', '', $statusPerkawinanRaw);
-
-                $statusPerkawinanClean = preg_replace('/\b[A-Z]$/', '', $statusPerkawinanClean);
-
-                $statusPerkawinanClean = trim(preg_replace('/\s+/', ' ', $statusPerkawinanClean));
-
-                $data['status_perkawinan'] = $statusPerkawinanClean;
+            // Normalisasi: Ubah hasil tangkapan OCR menjadi teks baku sesuai value Dropdown Select2
+            if (strpos($agamaRaw, 'SLAM') !== false) { // Nangkap ISLAM atau 1SLAM
+                $data['agama'] = 'ISLAM';
+            } elseif (strpos($agamaRaw, 'KRISTEN') !== false) {
+                $data['agama'] = 'KRISTEN';
+            } elseif (strpos($agamaRaw, 'KAT') !== false) { 
+                $data['agama'] = 'KATHOLIK';
+            } elseif (strpos($agamaRaw, 'HINDU') !== false) {
+                $data['agama'] = 'HINDU';
+            } elseif (strpos($agamaRaw, 'BUD') !== false) { 
+                $data['agama'] = 'BUDDHA';
+            } elseif (strpos($agamaRaw, 'KONGHUCU') !== false) {
+                $data['agama'] = 'KONGHUCU';
+            } elseif (strpos($agamaRaw, 'KEPERCAYAAN') !== false) {
+                $data['agama'] = 'KEPERCAYAAN';
             }
+        }
+            
+        if (preg_match('/\b(BELUM\s*KAWIN|KAWIN|CERAI\s*HIDUP|CERAI\s*MATI)\b/i', $text, $m)){
+            // Rapikan kalau misal kebacanya "BELUM  KAWIN" (spasi dobel)
+            $data['status_perkawinan'] = strtoupper(trim(preg_replace('/\s+/', ' ', $m[1])));
+        }
 
-        if (preg_match('/PEKERJAAN\s*[:\-]?\s*([^\n]+)/i', $text, $m)){
+        if (preg_match('/PEKERJAAN[^A-Z]*([A-Z\/\s]+)/i', $text, $m)){
                 $pekerjaanRaw = $m[1];
 
                 if (!empty($data['kabupaten'])) {
@@ -386,18 +409,17 @@ class ReadKtpController extends Controller
                 $data['pekerjaan'] = $pekerjaanClean;
             }
 
-        if (preg_match('/KEWARGANEGARAAN\s*[:\-]?\s*(WNI|WNA)/i', $text, $m))
-            $data['kewarganegaraan'] = $m[1];
-        if (preg_match('/Berlaku Hingga\s*[:\-]?\s*([^\n]+)/i', $text, $m)){
-            $raw = strtoupper($m[1]);
-
-                if (strpos($raw, 'SEUMUR HIDUP') !== false) {
-                    $data['berlaku_sampai'] = 'SEUMUR HIDUP';
-                }
-                elseif (preg_match('/\d{2}[-\/]\d{2}[-\/]\d{4}/', $raw, $dateMatch)) {
-                    $data['berlaku_sampai'] = $dateMatch[0];
-                }
+        if (preg_match('/\b(WNI|WNA)\b/i', $text, $m)){
+            $data['kewarganegaraan'] = strtoupper($m[1]);
+        }
+        if (preg_match('/SEUMUR\s*HIDUP/i', $text)) {
+            $data['berlaku_sampai'] = 'SEUMUR HIDUP';
+        } else {
+            // Kalau misal KTP lama / WNA yang ada tanggal berlakunya, baru cari format tanggal
+            if (preg_match('/(?:BERLAKU|HINGGA)[^\d]*(\d{2}[-\/]\d{2}[-\/]\d{4})/i', $text, $dateMatch)) {
+                $data['berlaku_sampai'] = $dateMatch[1];
             }
+        }
 
 
         return $data;

@@ -30,6 +30,17 @@ class KtpVerified extends Model
         'ktp_image_path',
         'verified_by'
     ];
+
+    protected $casts = [
+        'nik'          => 'encrypted',
+        'nama'         => 'encrypted',
+        'alamat'       => 'encrypted',
+        'rt_rw'        => 'encrypted',
+        'kel_desa'     => 'encrypted',
+        'kecamatan'    => 'encrypted',
+        'kabupaten'    => 'encrypted',
+        'provinsi'     => 'encrypted' 
+    ];
     public function readKtp()
     {
         return $this->belongsTo(ReadKtp::class, 'submission_id', 'id');
