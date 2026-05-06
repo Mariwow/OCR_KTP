@@ -12,6 +12,8 @@ class ReadKtpController extends Controller
 {
     public function update(Request $request)
     {
+        $isDraft = $request->input('save_mode') === 'draft';
+
         $validated = $request->validate([
             'nik' => 'required|string|size:16',
             'nama' => 'required|string',
@@ -35,11 +37,12 @@ class ReadKtpController extends Controller
         $ktp = ReadKtp::findOrFail($request->id);
 
         $ktp->update($validated);
-        $ktp->update(['status' => 'Verified']);
+        $statusAkhir = $isDraft ? 'Pending' : 'Verified';
+        $ktp->update(['status' => $statusAkhir]);
 
         return response()->json([
             'status'  => 'success',
-            'message' => 'Verified KTP',
+            'message' => $isDraft ? 'Disimpan sebagai Draft' : 'Verified KTP',
             'data' => $ktp
         ], 201);
     }
@@ -300,7 +303,7 @@ class ReadKtpController extends Controller
         }
 
         if (preg_match('/(\d{2}[-\s\.\:\/]+\d{2}[-\s\.\:\/]+\d{4})/', $text, $m)) {
-            $rawDate = $m[1]; // Hasilnya misal: "31:03-2004" atau "31 03.2004"
+            $rawDate = $m[1]; 
             
             // Sapu bersih: Ganti semua simbol yang bukan angka menjadi strip (-)
             $cleanDate = preg_replace('/[^0-9]/', '-', $rawDate);

@@ -6,6 +6,7 @@ use App\Http\Controllers\PassportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KtpVerificationController;
+use App\Http\Controllers\ReportController;
 use Carbon\Carbon;
 use App\Models\ReadKtp;
 use App\Models\Passport;
@@ -76,6 +77,10 @@ Route::get('/reportData', function () {
     return view('reportData');
 })->middleware('auth')->name('reportData');
 
+Route::get('/birthday', function () {
+    return view('birthday');
+})->middleware('auth')->name('birthday');
+
 Route::get('/accountControl', [AuthController::class, 'viewIndex'])->name('accountControl');
 
 Route::post('/accountControl/store', [AuthController::class, 'register'])->name('account.store');
@@ -100,3 +105,11 @@ Route::delete('/users/{id}', [AuthController::class, 'deleteAccount'])->name('us
 Route::get('/ktp/cetak-pdf/{id}', [KtpVerificationController::class, 'cetakPdf'])->name('ktp.pdf');
 
 Route::get('/passport/cetak-pdf/{id}', [PassportController::class, 'cetakPdf'])->name('passport.pdf');
+
+Route::get('/report-data/export', [ReportController::class, 'exportExcel'])->name('reportData.export');
+
+Route::get('/report-data/statistic', [ReportController::class, 'getStatistics'])->name('reportData.statistics');
+
+Route::get('/birthday', [DashboardController::class, 'birthday'])->name('birthday');
+
+Route::get('/birthday/data', [DashboardController::class, 'getBirthdayData'])->name('birthday.data');

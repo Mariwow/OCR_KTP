@@ -18,35 +18,32 @@ class DashboardController extends Controller
         $threshold = Carbon::now()->subHours(12);
         $userId = auth()->id();
 
-        // 1. Ambil 3 KTP terbaru
         $ktps = ReadKtp::where('uploaded_by', $userId)
             ->where('created_at', '>=', $threshold)
             ->latest()
             ->take(3)
             ->get()
             ->map(function ($item) {
-                $item->type = 'KTP'; // Tandai sebagai KTP
+                $item->type = 'KTP'; 
                 $item->display_name = $item->nama;
                 $item->display_number = $item->nik;
-                $item->image = $item->ktp_image_path; // Sesuaikan nama kolom gambar kamu
+                $item->image = $item->ktp_image_path; 
                 return $item;
             });
 
-        // 2. Ambil 3 Passport terbaru
         $passports = Passport::where('uploaded_by', $userId)
             ->where('created_at', '>=', $threshold)
             ->latest()
             ->take(3)
             ->get()
             ->map(function ($item) {
-                $item->type = 'PASSPORT'; // Tandai sebagai Passport
+                $item->type = 'PASSPORT'; 
                 $item->display_name = $item->nama;
                 $item->display_number = $item->no_paspor;
                 $item->image = $item->passport_image_path;
                 return $item;
             });
 
-        // 3. Gabungkan, Urutkan, dan Ambil 3 Teratas secara keseluruhan
         $recentUploads = $ktps->concat($passports)
             ->sortByDesc('created_at')
             ->take(3);
@@ -64,7 +61,7 @@ class DashboardController extends Controller
             ->latest()
             ->get()
             ->map(function ($item) {
-                $item->type = 'KTP'; // Tandai sebagai KTP
+                $item->type = 'KTP'; 
                 $item->display_name = $item->nama;
                 $item->display_number = $item->nik;
                 $item->setAttribute('image', $item->ktp_image_path);
@@ -77,7 +74,7 @@ class DashboardController extends Controller
             ->latest()
             ->get()
             ->map(function ($item) {
-                $item->type = 'PASSPORT'; // Tandai sebagai Passport
+                $item->type = 'PASSPORT'; 
                 $item->display_name = $item->nama;
                 $item->display_number = $item->no_paspor;
                 $item->image = $item->passport_image_path;
@@ -132,11 +129,8 @@ class DashboardController extends Controller
             DB::beginTransaction();
 
             if ($type === 'KTP') {
-                // 1. Ambil data asli dari ReadKtp
                 $source = ReadKtp::findOrFail($id);
 
-                // 2. Masukkan ke tabel ktp_verified
-                // Kita ambil hanya field yang ada di $fillable KtpVerified
                 KtpVerified::create([
                     'submission_id'     => $source->id,
                     'nik'               => $source->nik,
@@ -157,14 +151,12 @@ class DashboardController extends Controller
                     'golongan_darah'    => $source->golongan_darah,
                     'berlaku_sampai'    => $source->berlaku_sampai,
                     'ktp_image_path'    => $source->ktp_image_path,
-                    'verified_by'       => auth()->id(), // Admin yang sedang login
+                    'verified_by'       => auth()->id(), 
                 ]);
 
-                // 3. Update status di tabel aslinya
                 $source->update(['status' => 'Done']);
 
             } else if ($type === 'PASSPORT') {
-                // Logika serupa untuk Passport (jika ada tabel passport_verified)
                 $source = Passport::findOrFail($id);
 
                 PassportVerified::create([
@@ -180,11 +172,10 @@ class DashboardController extends Controller
                     'tanggal_terbentuk' => $source->tanggal_terbentuk,
                     'no_reg'            => $source->no_reg,
                     'passport_image_path'         => $source->passport_image_path,
-                    'verified_by'       => auth()->id(), // Admin yang sedang login
+                    'verified_by'       => auth()->id(),
                 ]);
 
                 $source->update(['status' => 'Done']);
-                // Masukkan ke tabel passport_verified jika sudah kamu buat
             }
 
             DB::commit();
@@ -192,21 +183,18 @@ class DashboardController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            dd($e); // Ini akan memunculkan "Laporan Dosa" kodinganmu secara lengkap di layar
+            dd($e); 
         }
     }
 
     public function rejectData(Request $request, $id, $type)
     {
-        // Validasi agar notes tidak kosong
         $request->validate([
             'note' => 'required|string|max:500'
         ]);
 
-        // Cari datanya
         $model = ($type === 'KTP') ? ReadKtp::findOrFail($id) : Passport::findOrFail($id);
-        
-        // Update status dan simpan alasan
+
         $model->update([
             'status' => 'rejected',
             'note' => $request->note
@@ -223,17 +211,14 @@ public function showReportAdmin()
         ->map(function ($item) {
             $item->type = 'KTP'; 
             
-            // KUNCI PERBAIKAN: Timpa ID-nya dengan ID asli dari tabel ReadKtp!
             $item->id = $item->readKtp->id; 
             
             $item->display_name = $item->nama;
             $item->display_number = $item->nik;
             $item->setAttribute('image', $item->ktp_image_path);
             
-            // Panggil dari relasi readKtp, lalu ke user
             $item->display_user = $item->readKtp->user->name ?? 'Unknown FO';
             
-            // Panggil dari relasi admin (verified_by)
             $item->display_user_admin = $item->user->name ?? 'System';
             
             return $item;
@@ -245,7 +230,6 @@ public function showReportAdmin()
             ->map(function ($item) {
                 $item->type = 'PASSPORT'; 
                 
-                // KUNCI PERBAIKAN: Timpa ID-nya dengan ID asli dari tabel Passport Mentah!
                 $item->id = $item->passport->id; 
                 
                 $item->display_name = $item->nama;
@@ -302,15 +286,99 @@ public function showReportAdmin()
     
     public function Restore(Request $request, $id, $type)
     {
-        // Cari datanya
         $model = ($type === 'KTP') ? ReadKtp::findOrFail($id) : Passport::findOrFail($id);
         
-        // Update status dan simpan alasan
         $model->update([
             'status' => 'verified',
             'note' => ''
         ]);
         
         return back()->with('success', 'Data ' . $type . ' berhasil dipulihkan !');
+    }
+
+    public function birthday()
+    {
+        $today = Carbon:: now();
+
+        $ktpToday = KtpVerified::whereMonth('tanggal_lahir', $today->month)
+            ->whereDay('tanggal_lahir', $today->day)
+            ->get()
+            ->groupBy('nik')
+            ->map(function($group) {
+
+            $item = $group->first();
+
+                return (object)[
+                    'nama' => $item->nama,
+                    'tanggal_lahir' => Carbon::parse($item->tanggal_lahir)->format('d M Y'),
+                    'tipe' => 'KTP',
+                    'total_checkin' => $group->count()
+                ];
+            });
+
+        $passportToday = PassportVerified::whereMonth('tanggal_lahir', $today->month)
+            ->whereDay('tanggal_lahir', $today->day)
+            ->get()
+            ->groupBy('nomor_paspor')
+            ->map(function($group){
+
+                $item = $group->first();
+
+                return (object)[
+                    'nama' => $item->nama,
+                    'tanggal_lahir' => Carbon::parse($item->tanggal_lahir)->format('d M Y'),
+                    'tipe' => 'Passport',
+                    'total_checkin' => $group->count()
+                ];
+            });
+            $todayBirthdays = $ktpToday->concat($passportToday);
+        return view('birthday', compact('todayBirthdays'));
+    }
+
+    public function getBirthdayData(Request $request)
+    {
+        $dateFilter = $request->date_filter;
+        $start = Carbon::now()->startOfMonth();
+        $end = Carbon::now()->endOfMonth();
+
+        if ($dateFilter){
+            $dates = explode(' - ', $dateFilter);
+            if(count($dates) == 2){
+                $start = Carbon::createFromFormat('d/m/Y', $dates[0])->startOfDay();
+                $end = Carbon::createFromFormat('d/m/Y', $dates[1])->endOfDay();
+            }
+        }
+
+        $dataKtp = KtpVerified::all()->filter(function($item) use ($start, $end){
+            if(!$item->tanggal_lahir) return false;
+            $bday = Carbon::parse($item->tanggal_lahir)->year(Carbon::now()->year);
+            return $bday->between($start, $end);
+        })->groupBy('nik')->map(function($group){
+            $item = $group->first();
+            return[
+                'nama' => $item->nama,
+                'tanggal_lahir' => Carbon::parse($item->tanggal_lahir)->format('d M Y'),
+                'tipe' => 'KTP',
+                'total_checkin' => $group->count()
+            ];
+        })->values();
+
+        $dataPassport = PassportVerified::all()->filter(function($item) use ($start, $end) {
+            if (!$item->tanggal_lahir) return false;
+            $bday = \Carbon\Carbon::parse($item->tanggal_lahir)->year(\Carbon\Carbon::now()->year);
+            return $bday->between($start, $end);
+        })->groupBy('nomor_paspor')->map(function($group) {
+            $item = $group->first();
+            return [
+                'nama' => $item->nama,
+                'tanggal_lahir' => \Carbon\Carbon::parse($item->tanggal_lahir)->format('d M Y'),
+                'tipe' => 'Passport',
+                'total_checkin' => $group->count()
+            ];
+        })->values();
+
+        $filteredData = $dataKtp->concat($dataPassport)->values();
+
+        return response()->json($filteredData);
     }
 }

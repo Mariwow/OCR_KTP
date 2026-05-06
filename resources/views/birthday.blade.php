@@ -9,7 +9,7 @@
     <meta name="author" content="theme_ocean">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Trihaka | confirmation</title>
+    <title>Trihaka | Report</title>
 
     <link rel="icon" type="image/png" href="assets/images/logo_cavinton_white.png">
     <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
@@ -23,6 +23,19 @@
     <link rel="stylesheet" type="text/css" href="assets/css/theme.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
+    <style>
+        .daterangepicker:not(.show-calendar) .ranges,
+        .daterangepicker:not(.show-calendar) .ranges ul {
+            width: 100% !important;
+            float: none;
+        }
+        
+        .daterangepicker .ranges li {
+            border-radius: 5px;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
      <nav class="nxl-navigation">
@@ -70,7 +83,6 @@
             </div>
         </div>
     </nav>
-
     <header class="nxl-header">
         <div class="header-wrapper">
             <div class="header-left d-flex align-items-center gap-4">
@@ -127,13 +139,67 @@
         <div class="nxl-content">
             <div class="main-content">
                 <div class="row">
+                    <div class="col-lg-12 mb-0">
+                        <div class="card border-top-0 mb-0" style="border-top: 4px solid #0e033c !important;">
+                            <div class="row">
+                            <div class="col-lg-12 mb-1">
+                                <!-- Kasih border atas warna hijau biar mencolok -->
+                                    <div class="card-header">
+                                        <h5 class="fw-bold mb-0">
+                                            <span class="d-block mb-2"><i class="fa-solid fa-cake-candles  me-2"></i> Birthday Today</span>
+                                            <span class="fs-12 fw-normal text-muted">Guest birthday today. Don't forget to prepare a surprise!</span>
+                                        </h5>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th class="text-center">Guest Name</th>
+                                                        <th class="text-center">Birth Date</th>
+                                                        <th class="text-center">Document Type</th>
+                                                        <th class="text-center">Total Check-in</th> 
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                   @forelse($todayBirthdays as $tamu)
+                                                   <tr>
+                                                        <td><span class="fw-semibold">{{ $tamu->nama }}</span></td>
+                                                        <td class="text-center"><span class="fw-semibold">{{ $tamu->tanggal_lahir}} (Today!)</span></td>
+                                                        <td class="text-center"><span class="badge {{ $tamu->tipe == 'KTP' ? 'bg-soft-primary text-primary' : 'bg-soft-warning text-dark' }}">{{ $tamu->tipe }}</span></td>
+                                                        <td class="text-center"><span class="badge bg-primary">{{ $tamu->total_checkin }} Times</span></td>
+                                                   </tr>
+                                                   @empty
+                                                   <tr>
+                                                        <td colspan="4" class="text-center text-muted py-4">No guest are birthday today!</td>
+                                                   </tr>
+                                                   @endforelse
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="nxl-content">
+            <div class="main-content">
+                <div class="row">
                     <div class="col-lg-12">
                         <div class="card border-top-0">
                             <div class="card-header">
                                 <h5 class="fw-bold mb-0">
-                                    <span class="d-block mb-2">Confirmation Data</span>
-                                    <span class="fs-12 fw-normal text-muted">Data yang ditolak akan otomatis pindah ke halaman arsip penolakan.</span>
+                                    <span class="d-block mb-2">Birthday Data</span>
+                                    <span class="fs-12 fw-normal text-muted">Displays all Nearby Birthday</span>
                                 </h5>
+
+                                <div class="input-group" style="width: 280px;">
+                                    <span class="input-group-text bg-white" id="btnCalendarIcon" style="cursor: pointer;"><i class="fa-regular fa-calendar"></i></span>
+                                    <input type="text" id="birthdayFilter" class="form-control" placeholder="Pick Date Range..">
+                                </div>
                             </div>
                             
                             <div class="card-body p-0">
@@ -142,55 +208,13 @@
                                         <thead>
                                             <tr>
                                                 <th class="text-center">Name</th>
-                                                <th class="text-center">ID Number</th>
-                                                <th class="text-center">Type</th>
-                                                <th class="text-center">Uploaded At</th>
-                                                <th class="text-center">Uploaded By</th>
-                                                <th class="text-center">Actions</th>
+                                                <th class="text-center">Birth Date</th>
+                                                <th class="text-center">Document Type</th>
+                                                <th class="text-center">Total Check</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach($recentUploadsAdmin as $data)
-                                            <tr>
-                                                <td>
-                                                    <div class="hstack gap-3">
-                                                        <div class="avatar-image avatar-md">
-                                                            <img src="{{ asset('storage/' . $data->image) }}" class="img-fluid" alt="Doc">
-                                                        </div>
-                                                        <div>
-                                                            <span class="text-truncate-1-line fw-semibold">{{ $data->display_name }}</span>
-                                                            <small class="text-muted">Status: <span class="badge bg-soft-secondary text-secondary">Pending</span></small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td><code class="text-primary fw-bold">{{ $data->display_number }}</code></td>
-                                                <td class="text-center">
-                                                    <span class="badge {{ $data->type == 'KTP' ? 'bg-soft-primary text-primary' : 'bg-soft-warning text-dark' }}">
-                                                        {{ $data->type }}
-                                                    </span>
-                                                </td>
-                                                <td class="text-center">{{ $data->created_at->format('d/m/Y H:i') }}</td>
-                                                <td class="text-center">
-                                                    <span class="text-truncate-1-line fw-semibold">{{ $data->display_user }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="hstack gap-2 justify-content-end">
-                                                        <button type="button" onclick="editDocument({{ $data->id }}, '{{ $data->type }}')" class="btn btn-sm btn-icon btn-outline-primary" title="Edit">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        
-                                                        <button type="button" onclick="prepareAction({{ $data->id }}, '{{ $data->type }}', 'accept')" class="btn btn-sm btn-icon btn-outline-success" title="Accept">
-                                                            <i class="fas fa-check"></i>
-                                                        </button>
-
-                                                        <button type="button" onclick="prepareAction({{ $data->id }}, '{{ $data->type }}', 'reject')" class="btn btn-sm btn-icon btn-outline-danger" title="Reject">
-                                                            <i class="fas fa-times"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            @endforeach
+                                            
                                         </tbody>
                                     </table>
                                 </div>
@@ -351,129 +375,105 @@
             </div>
         </div>
     </div>
-    
-    @include('modals.editPassport')
-    @include('modals.editKtp')
+
+    @include('modals.viewPassport')
+    @include('modals.viewKtp')
     @include('scripts.editScript')
-    @include('modals.status')
 
-    <div class="modal fade" id="modalAccept" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-body text-center p-4">
-                    <i class="fas fa-check-circle text-success mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="fw-bold">Verifikasi Data?</h5>
-                    <p class="text-muted small">Data ini akan ditandai sebagai 'Verified' dan masuk ke laporan.</p>
-                    <form id="formAccept" method="POST">
-                        @csrf
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success">Ya, Verifikasi!</button>
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+ <!-- 1. WAJIB PALING ATAS: Panggil jQuery dulu agar plugin lain bisa menumpang -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- 2. WAJIB ADA: Moment.js (Jantungnya Daterangepicker) -->
+    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 
-    <div class="modal fade" id="modalReject" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-md"> <div class="modal-content">
-                <div class="modal-body p-4">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-exclamation-triangle text-danger mb-3" style="font-size: 3rem;"></i>
-                        <h5 class="fw-bold">Tolak Data?</h5>
-                        <p class="text-muted small">Berikan alasan kenapa data ini ditolak.</p>
-                    </div>
-                    
-                    <form id="formReject" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="note" class="form-label fw-bold small">Alasan Penolakan:</label>
-                            <textarea class="form-control" name="note" id="note" rows="3" placeholder="Contoh: Foto KTP terlalu buram atau NIK tidak sesuai..." required></textarea>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-danger">Tolak Data</button>
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!--! BEGIN: Vendors JS !-->
+    <!-- 3. Plugin Bawaan Template & Lainnya -->
     <script src="assets/vendors/js/vendors.min.js"></script>
-    <!-- vendors.min.js {always must need to be top} -->
     <script src="assets/vendors/js/daterangepicker.min.js"></script>
     <script src="assets/vendors/js/apexcharts.min.js"></script>
-    <script src="assets/vendors/js/jquery.time-to.min.js "></script>
+    <script src="assets/vendors/js/jquery.time-to.min.js"></script>
     <script src="assets/vendors/js/circle-progress.min.js"></script>
-    <!--! END: Vendors JS !-->
-    <!--! BEGIN: Apps Init  !-->
     <script src="assets/js/common-init.min.js"></script>
     <script src="assets/js/analytics-init.min.js"></script>
-    <!--! END: Apps Init !-->
-    <!--! BEGIN: Theme Customizer  !-->
     <script src="assets/js/theme-customizer-init.min.js"></script>
-    <!--! END: Theme Customizer !-->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- 4. DataTables -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="assets/vendors/js/select2.min.js"></script>
-    <script src="assets/vendors/js/select2-active.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#myTable').DataTable({
-                "pageLength": 10, // Default jumlah data yang tampil
-                "ordering": true, // Mengaktifkan fitur sorting klik di header tabel
-                "info": true      // Menampilkan tulisan "Showing 1 to 10 of 50 entries"
-            });
-        });
-$(document).ready(function() {
-    // Aktifkan Select2 untuk Provinsi KTP
-    $('#res_provinsi').select2({
-        dropdownParent: $('#res_provinsi').parent(), 
-        width: '100%',
-        placeholder: "-- Cari & Pilih Provinsi --"
-    });
-    $('#res_agama').select2({
-        dropdownParent: $('#res_agama').parent(), 
-        width: '100%',
-        placeholder: "-- Pilih Agama --"
-    });
-        $(document).ready(function() {
-        // Sulap ID res_kewarganegaraan_paspor menjadi Select2 yang aman untuk modal
-        $('#res_kewarganegaraan_paspor').select2({
-            dropdownParent: $('#res_kewarganegaraan_paspor').parent(),  // Sesuaikan dengan ID modal kamu
-            width: '100%',
-            placeholder: "-- Pilih Negara / Kewarganegaraan --"
-        });
-    });
-});
-    </script>
-    
 
+    <!-- 5. KODE CUSTOM KITA (Jadikan 1 Blok Saja) -->
+    <script>
+        $(document).ready(function(){
+
+            $('#btnCalendarIcon').click(function() {
+                $('#birthdayFilter').click();
+            });
+
+            $('#birthdayFilter').daterangepicker({
+                opens: 'left',
+                autoUpdateInput: false,
+                locale: {
+                    cancelLabel: 'Clear',
+                    format: 'DD/MM/YYYY',
+                    customRangeLabel: 'Pilih Manual'
+                },
+                ranges: {
+                    'This Week': [moment().startOf('week'), moment().endOf('week')],
+                    'Next Week': [moment().add(1, 'week').startOf('week'), moment().add(1, 'week').endOf('week')],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Next Month': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
+                }
+            });
+            
+            $('#birthdayFilter').on('show.daterangepicker', function(ev, picker) {
+                let lebarInput = $(this).closest('.input-group').outerWidth();
+                picker.container.css({
+                    'min-width': lebarInput + 'px'
+                });
+            });
+
+
+            function fetchBirthdayData(dataRange =''){
+                $.ajax({
+                    url: "{{ route('birthday.data') }}",
+                    type: "GET",
+                    data: {date_filter: dataRange},
+                    success: function(response){
+                        let rows ='';
+                        if(response.length > 0){
+                            response.forEach(function(tamu){
+                                let badgeTipe = tamu.tipe === 'KTP' ? 'bg-primary' : 'bg-soft-warning text-dark';
+                                rows += `
+                                    <tr>
+                                        <td><span class="fw-semibold">${tamu.nama}</span></td>
+                                        <td class="text-center">${tamu.tanggal_lahir}</td>
+                                        <td class="text-center"><span class="badge ${badgeTipe}">${tamu.tipe}</span></td>
+                                        <td class="text-center"><span class="badge bg-primary">${tamu.total_checkin} Times</span></td>
+                                    </tr>
+                                `;
+                            });
+                        }else{
+                            rows = `<tr><td colspan="4" class="text-center text-muted py-4">Tidak ada jadwal ulang tahun di rentang tanggal ini.</td></tr>`;
+                        }
+                        $('#myTable tbody').html(rows);
+                    }
+                });
+            }
+
+            fetchBirthdayData();
+
+            $('#birthdayFilter').on('apply.daterangepicker', function(ev, picker){
+                let selectedDate = picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY');
+                $(this).val(selectedDate);
+
+                fetchBirthdayData(selectedDate);
+            });
+
+            $('#birthdayFilter').on('cancel.daterangepicker', function(ev, picker){
+                $(this).val('');
+                fetchBirthdayData('');
+            });
+        })
+        
+    </script>
 </body>
 </html>
-
-<script>
-function prepareAction(id, type, action) {
-    if (action === 'accept') {
-        // Ganti URL Form sesuai route kamu (Sesuaikan namanya!)
-        const url = `/verify/accept/${id}/${type}`;
-        document.getElementById('formAccept').action = url;
-        
-        // Munculkan Modal
-        new bootstrap.Modal(document.getElementById('modalAccept')).show();
-        
-    } else if (action === 'reject') {
-        // Ganti URL Form sesuai route kamu
-        const url = `/verify/reject/${id}/${type}`;
-        document.getElementById('formReject').action = url;
-        
-        // Munculkan Modal
-        new bootstrap.Modal(document.getElementById('modalReject')).show();
-    }
-}
-</script>

@@ -12,11 +12,7 @@
     <title>Trihaka | Report</title>
 
     <link rel="icon" type="image/png" href="assets/images/logo_cavinton_white.png">
-    <!--! END: Favicon-->
-    <!--! BEGIN: Bootstrap CSS-->
     <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
-    <!--! END: Bootstrap CSS-->
-    <!--! BEGIN: Vendors CSS-->
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/vendors.min.css">
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/daterangepicker.min.css">
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/jquery-jvectormap.min.css">
@@ -24,17 +20,22 @@
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/select2-theme.min.css">
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/jquery.time-to.min.css">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom.css') }}">
-    <!--! END: Vendors CSS-->
-    <!--! BEGIN: Custom CSS-->
     <link rel="stylesheet" type="text/css" href="assets/css/theme.min.css">
-    <!--! END: Custom CSS-->
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <!--! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries !-->
-    <!--! WARNING: Respond.js doesn"t work if you view the page via file: !-->
-    <!--[if lt IE 9]>
-			<script src="https:oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-			<script src="https:oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-	<![endif]-->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
+    <style>
+        .daterangepicker:not(.show-calendar) .ranges,
+        .daterangepicker:not(.show-calendar) .ranges ul {
+            width: 100% !important;
+            float: none;
+        }
+        
+        .daterangepicker .ranges li {
+            border-radius: 5px;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
      <nav class="nxl-navigation">
@@ -72,21 +73,19 @@
                             <span class="nxl-mtext" >Report</span>
                         </a>
                     </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="{{ route('birthday') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="fa-solid fa-cake-candles"></i></i></span>
+                            <span class="nxl-mtext" >Birthday</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
-    <!--! ================================================================ !-->
-    <!--! [End]  Navigation Manu !-->
-    <!--! ================================================================ !-->
-    <!--! ================================================================ !-->
-    <!--! [Start] Header !-->
-    <!--! ================================================================ !-->
     <header class="nxl-header">
         <div class="header-wrapper">
-            <!--! [Start] Header Left !-->
             <div class="header-left d-flex align-items-center gap-4">
-                <!--! [Start] nxl-head-mobile-toggler !-->
                 <a href="javascript:void(0);" class="nxl-head-mobile-toggler" id="mobile-collapse">
                     <div class="hamburger hamburger--arrowturn">
                         <div class="hamburger-box">
@@ -95,7 +94,6 @@
                     </div>
                 </a>
             </div>
-            <!--! [Start] Header Right !-->
             <div class="header-right ms-auto">
                 <div class="d-flex align-items-center">
                     <div class="nxl-h-item dark-light-theme">
@@ -134,7 +132,6 @@
                     </div>
                 </div>
             </div>
-            <!--! [End] Header Right !-->
         </div>
     </header>
 
@@ -142,11 +139,68 @@
         <div class="nxl-content">
             <div class="main-content">
                 <div class="row">
-                    <div class="col-lg-12">
-                        <div class="card border-top-0">
+                    <div class="col-lg-12 mb-0">
+                        <div class="card border-top-0 mb-0">
                             <div class="card-header">
                                 <h5 class="fw-bold mb-0">
                                     <span class="d-block mb-2">Report Data</span>
+                                    <span class="fs-12 fw-normal text-muted">Displays all general data</span>
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="row">
+                                    
+                                    <!-- BAGIAN KIRI: GRAFIK KTP VS PASPOR -->
+                                    <div class="col-lg-8 border-end pe-4">
+                                        <h6 class="text-center fw-bold mb-3">Statistik</h6>
+                                        <div id="documentChart"></div>
+                                    </div>
+
+                                    <!-- BAGIAN KANAN: FILTER & TOMBOL EKSPOR -->
+                                    <div class="col-lg-4 d-flex flex-column justify-content-center ps-4">
+                                        <h6 class="fw-bold mb-4 text-center">Report Filter</h6>
+
+                                        <!-- Form ini akan mengarah ke Controller untuk export Excel -->
+                                        <form action="{{ route('reportData.export') }}" method="GET" class="mb-3">
+                                            
+                                            <!-- Input Daterangepicker -->
+                                            <div class="mb-4">
+                                                <label class="form-label text-muted fs-12 fw-bold text-uppercase">Select Date</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-white" id="btnCalendarIcon" style="cursor: pointer;" title="Klik untuk pilih tanggal">
+                                                        <i class="fa-regular fa-calendar"></i>
+                                                    </span>
+                                                    <input type="text" name="date_filter" id="reportDateRange" class="form-control" placeholder="Today / Pilih Rentang...">
+                                                </div>
+                                            </div>
+
+                                            <!-- Tombol Cetak Excel -->
+                                            <button type="submit" class="btn btn-success w-100 d-flex justify-content-center align-items-center gap-2" style="padding: 10px;">
+                                                <i class="fa-solid fa-file-excel"></i> Cetak Excel
+                                            </button>
+                                        </form>
+
+                                        <!-- Tombol Cetak Grafik -->
+                                        <button type="button" id="btnCetakGrafik" class="btn btn-outline-primary w-100 d-flex justify-content-center align-items-center gap-2" style="padding: 10px;">
+                                            <i class="fa-solid fa-image"></i> Cetak Grafik
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <div class="nxl-content">
+            <div class="main-content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card border-top-0 mb-0">
+                            <div class="card-header">
+                                <h5 class="fw-bold mb-0">
+                                    <span class="d-block mb-2">Search Data</span>
                                     <span class="fs-12 fw-normal text-muted">Displays all confirmed data</span>
                                 </h5>
                             </div>
@@ -156,12 +210,12 @@
                                     <table class="table table-hover mb-0" id="myTable">
                                         <thead>
                                             <tr>
-                                                <th>User / Name</th>
-                                                <th>ID Number</th>
-                                                <th>Type</th>
-                                                <th>Uploaded By (FO)</th>
-                                                <th>Verified By (Admin)</th>
-                                                <th>Verified At</th>
+                                                <th class="text-center">Name</th>
+                                                <th class="text-center">ID Number</th>
+                                                <th class="text-center">Type</th>
+                                                <th class="text-center">Uploaded By (FO)</th>
+                                                <th class="text-center">Verified By (Admin)</th>
+                                                <th class="text-center">Verified At</th>
                                                 <th class="text-end">Actions</th>
                                             </tr>
                                         </thead>
@@ -182,23 +236,23 @@
                                                 
                                                 <td><code class="text-primary fw-bold">{{ $data->display_number }}</code></td>
                                                 
-                                                <td>
+                                                <td class="text-center">
                                                     <span class="badge {{ $data->type == 'KTP' ? 'bg-soft-primary text-primary' : 'bg-soft-warning text-dark' }}">
                                                         {{ $data->type }}
                                                     </span>
                                                 </td>
                                                 
-                                                <td>
+                                                <td class="text-center">
                                                     <span class="text-truncate-1-line fw-semibold">{{ $data->display_user }}</span>
                                                 </td>
                                                 
-                                                <td>
+                                                <td class="text-center">
                                                     <span class="text-truncate-1-line fw-semibold text-success">{{ $data->display_user_admin }}</span>
                                                 </td>
                                                 
-                                                <td>{{ $data->created_at->format('d/m/Y H:i') }}</td>
+                                                <td class="text-center">{{ $data->created_at->format('d/m/Y H:i') }}</td>
                                                 
-                                                <td>
+                                                <td class="text-center">
                                                     <div class="hstack gap-2 justify-content-end">
                                                         <button type="button" onclick="viewDocument({{ $data->id }}, '{{ $data->type }}')" class="btn btn-sm btn-icon btn-outline-primary" title="Rincian">
                                                             <i class="fa-solid fa-file"></i>    
@@ -232,7 +286,6 @@
                 </a>
             </div>
             <div class="customizer-sidebar-body position-relative p-4" data-scrollbar-target="#psScrollbarInit">
-                <!--! BEGIN: [Navigation] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-5 border border-gray-2 theme-options-set">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Navigation</label>
                     <div class="row g-2 theme-options-items app-navigation" id="appNavigationList">
@@ -246,8 +299,6 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Navigation] !-->
-                <!--! BEGIN: [Header] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-5 border border-gray-2 theme-options-set mt-5">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Header</label>
                     <div class="row g-2 theme-options-items app-header" id="appHeaderList">
@@ -261,8 +312,6 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Header] !-->
-                <!--! BEGIN: [Skins] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-5 border border-gray-2 theme-options-set">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Skins</label>
                     <div class="row g-2 theme-options-items app-skin" id="appSkinList">
@@ -276,8 +325,6 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Skins] !-->
-                <!--! BEGIN: [Typography] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-0 border border-gray-2 theme-options-set">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Typography</label>
                     <div class="row g-2 theme-options-items font-family" id="fontFamilyList">
@@ -371,7 +418,6 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Typography] !-->
             </div>
         </div>
     </div>
@@ -380,54 +426,159 @@
     @include('modals.viewKtp')
     @include('scripts.editScript')
 
-    <!--! BEGIN: Vendors JS !-->
+ <!-- 1. WAJIB PALING ATAS: Panggil jQuery dulu agar plugin lain bisa menumpang -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- 2. WAJIB ADA: Moment.js (Jantungnya Daterangepicker) -->
+    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+
+    <!-- 3. Plugin Bawaan Template & Lainnya -->
     <script src="assets/vendors/js/vendors.min.js"></script>
-    <!-- vendors.min.js {always must need to be top} -->
     <script src="assets/vendors/js/daterangepicker.min.js"></script>
     <script src="assets/vendors/js/apexcharts.min.js"></script>
-    <script src="assets/vendors/js/jquery.time-to.min.js "></script>
+    <script src="assets/vendors/js/jquery.time-to.min.js"></script>
     <script src="assets/vendors/js/circle-progress.min.js"></script>
-    <!--! END: Vendors JS !-->
-    <!--! BEGIN: Apps Init  !-->
     <script src="assets/js/common-init.min.js"></script>
     <script src="assets/js/analytics-init.min.js"></script>
-    <!--! END: Apps Init !-->
-    <!--! BEGIN: Theme Customizer  !-->
     <script src="assets/js/theme-customizer-init.min.js"></script>
-    <!--! END: Theme Customizer !-->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- 4. DataTables -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- 5. KODE CUSTOM KITA (Jadikan 1 Blok Saja) -->
     <script>
+        function prepareAction(id, type, action) {
+            if (action === 'accept') {
+                const url = `/verify/accept/${id}/${type}`;
+                document.getElementById('formAccept').action = url;
+                new bootstrap.Modal(document.getElementById('modalAccept')).show();
+            } else if (action === 'reject') {
+                const url = `/verify/reject/${id}/${type}`;
+                document.getElementById('formReject').action = url;
+                new bootstrap.Modal(document.getElementById('modalReject')).show();
+            }
+        }
+
         $(document).ready(function() {
-            $('#myTable').DataTable({
-                "pageLength": 10, // Default jumlah data yang tampil
-                "ordering": true, // Mengaktifkan fitur sorting klik di header tabel
-                "info": true      // Menampilkan tulisan "Showing 1 to 10 of 50 entries"
+            // 1. DEKLARASI WADAH GRAFIK DI AWAL (Biar bisa diakses tombol cetak)
+            var docChart = null;
+
+            // 2. Ikon kalender bisa diklik
+            $('#btnCalendarIcon').click(function() {
+                $('#reportDateRange').click();
             });
+
+            // 3. Inisiasi DataTables
+            $('#myTable').DataTable({
+                "pageLength": 10, 
+                "ordering": true,
+                "info": true      
+            });
+
+            // 4. FUNGSI AMBIL DATA & GAMBAR GRAFIK
+            function fetchChartData(dateRange = '') {
+                $.ajax({
+                    url: "{{ route('reportData.statistics') }}",
+                    type: "GET",
+                    data: { date_filter: dateRange },
+                    success: function(response) {
+                        if (!docChart) {
+                            var docOptions = {
+                                series: [response.ktp, response.passport], 
+                                labels: ['KTP', 'Passport'],
+                                chart: { type: 'donut', height: 320, toolbar: { show: false } },
+                                colors: ['#3b82f6', '#fbd38d'],
+                                plotOptions: {
+                                    pie: {
+                                        donut: {
+                                            size: '65%',
+                                            labels: {
+                                                show: true, name: { show: true }, value: { show: true },
+                                                total: { show: true, showAlways: true, label: 'Total Data', fontSize: '14px', fontWeight: 'bold', color: '#373d3f' }
+                                            }
+                                        }
+                                    }
+                                },
+                                dataLabels: { enabled: true, dropShadow: { enabled: false } },
+                                stroke: { show: true, colors: ['#ffffff'], width: 2 },
+                                legend: { position: 'bottom', horizontalAlign: 'center' }
+                            };
+                            
+                            docChart = new ApexCharts(document.querySelector("#documentChart"), docOptions);
+                            docChart.render();
+                        } else {
+                            docChart.updateSeries([response.ktp, response.passport]);
+                        }
+                    },
+                    error: function() {
+                        console.error("Gagal mengambil data statistik grafik.");
+                    }
+                });
+            }
+
+            // Panggil grafik pertama kali
+            fetchChartData();
+
+            // 5. INISIASI DATE PICKER
+            $('#reportDateRange').daterangepicker({
+                opens: 'left',
+                autoUpdateInput: false,
+                alwaysShowCalendars: false,
+                locale: {
+                    cancelLabel: 'Clear',
+                    format: 'DD/MM/YYYY',
+                    customRangeLabel: 'Pilih Manual'
+                },
+                ranges: {
+                   'Today': [moment(), moment()],
+                   'This Week': [moment().startOf('week'), moment().endOf('week')],
+                   'Last Week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
+                   'This Month': [moment().startOf('month'), moment().endOf('month')],
+                   'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                   'This Year': [moment().startOf('year'), moment().endOf('year')]
+                }
+            });
+
+            // Trik Dropdown Lebar
+            $('#reportDateRange').on('show.daterangepicker', function(ev, picker) {
+                let lebarInput = $(this).closest('.input-group').outerWidth();
+                picker.container.css({
+                    'min-width': lebarInput + 'px'
+                });
+            });
+
+            // Aksi Saat Memilih Tanggal
+            $('#reportDateRange').on('apply.daterangepicker', function(ev, picker) {
+                let selectedDate = picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY');
+                $(this).val(selectedDate);
+                fetchChartData(selectedDate); // Refresh Grafik
+            });
+
+            // Aksi Saat Menghapus Tanggal
+            $('#reportDateRange').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+                fetchChartData(''); // Kembalikan ke grafik All-Time
+            });
+
+            // 6. FUNGSI TOMBOL CETAK GRAFIK (Sekarang Pasti Jalan!)
+            $('#btnCetakGrafik').click(function() {
+                // Pastikan grafik sudah beres me-render sebelum didownload
+                if (docChart) {
+                    docChart.dataURI().then(({ imgURI }) => {
+                        let a = document.createElement("a");
+                        a.href = imgURI;
+                        a.download = "Grafik_Report_Trihaka.svg";
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    });
+                } else {
+                    alert("Tunggu sebentar, grafik sedang dimuat...");
+                }
+            });
+
         });
     </script>
-
 </body>
 </html>
-
-<script>
-function prepareAction(id, type, action) {
-    if (action === 'accept') {
-        // Ganti URL Form sesuai route kamu (Sesuaikan namanya!)
-        const url = `/verify/accept/${id}/${type}`;
-        document.getElementById('formAccept').action = url;
-        
-        // Munculkan Modal
-        new bootstrap.Modal(document.getElementById('modalAccept')).show();
-        
-    } else if (action === 'reject') {
-        // Ganti URL Form sesuai route kamu
-        const url = `/verify/reject/${id}/${type}`;
-        document.getElementById('formReject').action = url;
-        
-        // Munculkan Modal
-        new bootstrap.Modal(document.getElementById('modalReject')).show();
-    }
-}
-</script>

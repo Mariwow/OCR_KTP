@@ -34,7 +34,7 @@ class PassportController extends Controller
 
     public function update(Request $request)
     {
-        $passport = Passport::find($request->id); // Gunakan find(), jangan findOrFail() dulu
+        $passport = Passport::find($request->id); 
 
         if (!$passport) {
             return response()->json([
@@ -43,12 +43,14 @@ class PassportController extends Controller
             ], 404);
         }
 
+        $isDraft = $request->input('save_mode') === 'draft';
+
         $validated = $request->validate([
-            'kode_negara'       => 'required|string',
+            'kode_negara'       => 'nullable|string',
             'no_paspor'         => 'required|string',
             'nama'              => 'required|string',
-            'kewarganegaraan'   => 'required|string',
-            'jenis_kelamin'     => 'required|string',
+            'kewarganegaraan'   => 'nullable|string',
+            'jenis_kelamin'     => 'nullable|string',
             'tanggal_lahir'     => 'nullable|date',
             'tempat_lahir'      => 'nullable|string',
             'masa_berlaku'      => 'nullable|date',
@@ -56,11 +58,13 @@ class PassportController extends Controller
             'no_reg'            => 'nullable|string',
         ]);
 
-        $passport->update(array_merge($validated, ['status' => 'Verified']));
+        $statusAkhir = $isDraft ? 'Pending' : 'Verified';
+
+        $passport->update(array_merge($validated, ['status' => $statusAkhir]));
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Mantap! Data berhasil diperbarui.'
+            'message' => $isDraft ? 'Data disimpan sebagai Pending.' : 'Data berhasil diverifikasi.'
         ]);
     }
 

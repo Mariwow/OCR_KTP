@@ -190,6 +190,7 @@
                                     <div class="col-md-6 mb-3">  
                                         <label class="form-label fw-bold">Berlaku Hingga</label>
                                         <input type="text" class="form-control" id="res_berlaku_sampai" name="berlaku_sampai" placeholder="YYYY-MM-DD">
+                                        <input type="hidden" name="save_mode" id="hidden_save_mode" value="complete">
                                     </div>
                                 </div>
                             </div>
@@ -198,7 +199,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" id="btn-update-ktp" class="btn btn-primary">Simpan</button>
+                        <button type="submit" id="btnDraft" class="btn btn-warning" formnovalidate onclick="document.getElementById('hidden_save_mode').value = 'draft';">Simpan Sementara</button>
+                        <button type="submit" id="btn-update-ktp" class="btn btn-primary" onclick="document.getElementById('hidden_save_mode').value = 'complete';">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -222,6 +224,5 @@ $(document).ready(function() {
         width: '100%',
         placeholder: "-- Pilih Agama --"
     });
-
 });
 </script>

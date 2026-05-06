@@ -12,11 +12,7 @@
     <title>Trihaka | Rejection Archive</title>
 
     <link rel="icon" type="image/png" href="assets/images/logo_cavinton_white.png">
-    <!--! END: Favicon-->
-    <!--! BEGIN: Bootstrap CSS-->
     <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
-    <!--! END: Bootstrap CSS-->
-    <!--! BEGIN: Vendors CSS-->
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/vendors.min.css">
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/daterangepicker.min.css">
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/jquery-jvectormap.min.css">
@@ -25,16 +21,7 @@
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/jquery.time-to.min.css">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom.css') }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-    <!--! END: Vendors CSS-->
-    <!--! BEGIN: Custom CSS-->
     <link rel="stylesheet" type="text/css" href="assets/css/theme.min.css">
-    <!--! END: Custom CSS-->
-    <!--! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries !-->
-    <!--! WARNING: Respond.js doesn"t work if you view the page via file: !-->
-    <!--[if lt IE 9]>
-			<script src="https:oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-			<script src="https:oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-	<![endif]-->
 </head>
 <body>
      <nav class="nxl-navigation">
@@ -72,21 +59,19 @@
                             <span class="nxl-mtext" >Report</span>
                         </a>
                     </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="{{ route('birthday') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="fa-solid fa-cake-candles"></i></i></span>
+                            <span class="nxl-mtext" >Birthday</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
-    <!--! ================================================================ !-->
-    <!--! [End]  Navigation Manu !-->
-    <!--! ================================================================ !-->
-    <!--! ================================================================ !-->
-    <!--! [Start] Header !-->
-    <!--! ================================================================ !-->
     <header class="nxl-header">
         <div class="header-wrapper">
-            <!--! [Start] Header Left !-->
             <div class="header-left d-flex align-items-center gap-4">
-                <!--! [Start] nxl-head-mobile-toggler !-->
                 <a href="javascript:void(0);" class="nxl-head-mobile-toggler" id="mobile-collapse">
                     <div class="hamburger hamburger--arrowturn">
                         <div class="hamburger-box">
@@ -95,7 +80,6 @@
                     </div>
                 </a>
             </div>
-            <!--! [Start] Header Right !-->
             <div class="header-right ms-auto">
                 <div class="d-flex align-items-center">
                     <div class="nxl-h-item dark-light-theme">
@@ -133,8 +117,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <!--! [End] Header Right !-->
         </div>
     </header>
 
@@ -153,7 +135,6 @@
                 </a>
             </div>
             <div class="customizer-sidebar-body position-relative p-4" data-scrollbar-target="#psScrollbarInit">
-                <!--! BEGIN: [Navigation] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-5 border border-gray-2 theme-options-set">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Navigation</label>
                     <div class="row g-2 theme-options-items app-navigation" id="appNavigationList">
@@ -167,8 +148,6 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Navigation] !-->
-                <!--! BEGIN: [Header] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-5 border border-gray-2 theme-options-set mt-5">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Header</label>
                     <div class="row g-2 theme-options-items app-header" id="appHeaderList">
@@ -182,8 +161,6 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Header] !-->
-                <!--! BEGIN: [Skins] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-5 border border-gray-2 theme-options-set">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Skins</label>
                     <div class="row g-2 theme-options-items app-skin" id="appSkinList">
@@ -197,8 +174,6 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Skins] !-->
-                <!--! BEGIN: [Typography] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-0 border border-gray-2 theme-options-set">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Typography</label>
                     <div class="row g-2 theme-options-items font-family" id="fontFamilyList">
@@ -292,7 +267,6 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Typography] !-->
             </div>
         </div>
     </div>
@@ -315,13 +289,13 @@
                                     <table class="table table-hover mb-0" id="myTable">
                                         <thead>
                                             <tr>
-                                                <th>User / Name</th>
-                                                <th>ID Number</th>
-                                                <th>Type</th>
-                                                <th>Uploaded At</th>
-                                                <th>Uploaded By</th>
-                                                <th>Rejection Note</th>
-                                                <th class="text-end">Actions</th>
+                                                <th class="text-center">Name</th>
+                                                <th class="text-center">ID Number</th>
+                                                <th class="text-center">Type</th>
+                                                <th class="text-center">Uploaded At</th>
+                                                <th class="text-center">Uploaded By</th>
+                                                <th class="text-center">Rejection Note</th>
+                                                <th class="text-center">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -330,25 +304,22 @@
                                                 <td>
                                                     <div class="hstack gap-3">
                                                         <div class="avatar-image avatar-md">
-                                                            {{-- Menggunakan properti 'image' yang sudah di-map di Controller --}}
                                                             <img src="{{ asset('storage/' . $data->image) }}" class="img-fluid" alt="Doc">
                                                         </div>
                                                         <div>
                                                             <span class="text-truncate-1-line fw-semibold">{{ $data->display_name }}</span>
-                                                            {{-- Menampilkan info tambahan jika ada --}}
                                                             <small class="text-muted">Status: <span class="badge bg-soft-danger text-secondary">Rejected</span></small>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td><code class="text-primary fw-bold">{{ $data->display_number }}</code></td>
-                                                <td>
+                                                <td class="text-center">
                                                     <span class="badge {{ $data->type == 'KTP' ? 'bg-soft-primary text-primary' : 'bg-soft-warning text-dark' }}">
                                                         {{ $data->type }}
                                                     </span>
                                                 </td>
-                                                {{-- Menggunakan format tanggal Carbon --}}
-                                                <td>{{ $data->created_at->format('d/m/Y H:i') }}</td>
-                                                <td>
+                                                <td class="text-center">{{ $data->created_at->format('d/m/Y H:i') }}</td>
+                                                <td class="text-center">
                                                     <span class="text-truncate-1-line fw-semibold">{{ $data->display_user }}
                                                     </span>
                                                 </td>

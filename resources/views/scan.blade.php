@@ -13,11 +13,7 @@
     <title>Trihaka | Scan</title>
 
     <link rel="icon" type="image/png" href="assets/images/logo_cavinton_white.png">
-    <!--! END: Favicon-->
-    <!--! BEGIN: Bootstrap CSS-->
     <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
-    <!--! END: Bootstrap CSS-->
-    <!--! BEGIN: Vendors CSS-->
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/vendors.min.css">
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/daterangepicker.min.css">
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/jquery-jvectormap.min.css">
@@ -25,22 +21,10 @@
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/select2-theme.min.css">
     <link rel="stylesheet" type="text/css" href="assets/vendors/css/jquery.time-to.min.css">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom.css') }}">
-    <!--! END: Vendors CSS-->
-    <!--! BEGIN: Custom CSS-->
     <link rel="stylesheet" type="text/css" href="assets/css/theme.min.css">
-    <!--! END: Custom CSS-->
-    <!--! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries !-->
-    <!--! WARNING: Respond.js doesn"t work if you view the page via file: !-->
-    <!--[if lt IE 9]>
-			<script src="https:oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-			<script src="https:oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-		<![endif]-->
 </head>
 
 <body>
-    <!--! ================================================================ !-->
-    <!--! [Start] Navigation Manu !-->
-    <!--! ================================================================ !-->
     <nav class="nxl-navigation">
         <div class="navbar-wrapper">
             <div class="m-header">
@@ -68,12 +52,6 @@
             </div>
         </div>
     </nav>
-    <!--! ================================================================ !-->
-    <!--! [End]  Navigation Manu !-->
-    <!--! ================================================================ !-->
-    <!--! ================================================================ !-->
-    <!--! [Start] Header !-->
-    <!--! ================================================================ !-->
     <header class="nxl-header">
         <div class="header-wrapper">
             <!--! [Start] Header Left !-->
@@ -87,7 +65,6 @@
                     </div>
                 </a>
             </div>
-            <!--! [Start] Header Right !-->
             <div class="header-right ms-auto">
                 <div class="d-flex align-items-center">
                     <div class="nxl-h-item dark-light-theme">
@@ -126,21 +103,12 @@
                     </div>
                 </div>
             </div>
-            <!--! [End] Header Right !-->
         </div>
     </header>
-    <!--! ================================================================ !-->
-    <!--! [End] Header !-->
-    <!--! ================================================================ !-->
-    <!--! ================================================================ !-->
-    <!--! [Start] Main Content !-->
-    <!--! ================================================================ !-->
     <main class="nxl-container">
         <div class="nxl-content">
-            <!-- [ Main Content ] start -->
             <div class="main-content">
                 <div class="row">
-                    <!-- [Mini Card] start -->
                     <div class="col-12">
                         <div class="card stretch stretch-full">
                             <div class="card-body">
@@ -183,8 +151,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- [Mini Card] end -->
-                    <!-- [Mini Card] Start -->
                      <div class="col-12">
                         <div class="card stretch stretch-full">
                             <div class="card-body">
@@ -205,6 +171,15 @@
                                                         <p class="text-muted small mb-1">{{ $data->created_at->diffForHumans() }}</p>
                                                         <h6 class="fw-bold mb-1 text-truncate">{{ $data->display_name }}</h6>
                                                         <p class="mb-0 small text-muted">ID: {{ $data->display_number }}</p>
+                                                        <span class="badge {{ match($data->status) {
+                                                            'Verified' => 'bg-success',
+                                                            'Done'     => 'bg-primary',
+                                                            'Pending'  => 'bg-warning',
+                                                            'Uploaded' => 'bg-danger',
+                                                            default    => 'bg-secondary'
+                                                        } }}">
+                                                            {{ $data->status }}
+                                                        </span>
                                                     </div>
                                                     
                                                     <div class="card-footer bg-white border-top-0 d-grid">
@@ -224,18 +199,10 @@
                             </div>
                         </div>
                     </div>
-                    <!-- [Mini Card] end -->
                 </div>
             </div>
-            <!-- [ Main Content ] end -->
         </div>  
     </main>
-    <!--! ================================================================ !-->
-    <!--! [End] Main Content !-->
-    <!--! ================================================================ !-->
-    <!--! ================================================================ !-->
-    <!--! BEGIN: Theme Customizer !-->
-    <!--! ================================================================ !-->
     <div class="theme-customizer">
         <div class="customizer-handle">
             <a href="javascript:void(0);" class="cutomizer-open-trigger bg-primary">
@@ -250,7 +217,6 @@
                 </a>
             </div>
             <div class="customizer-sidebar-body position-relative p-4" data-scrollbar-target="#psScrollbarInit">
-                <!--! BEGIN: [Navigation] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-5 border border-gray-2 theme-options-set">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Navigation</label>
                     <div class="row g-2 theme-options-items app-navigation" id="appNavigationList">
@@ -264,8 +230,6 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Navigation] !-->
-                <!--! BEGIN: [Header] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-5 border border-gray-2 theme-options-set mt-5">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Header</label>
                     <div class="row g-2 theme-options-items app-header" id="appHeaderList">
@@ -279,8 +243,6 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Header] !-->
-                <!--! BEGIN: [Skins] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-5 border border-gray-2 theme-options-set">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Skins</label>
                     <div class="row g-2 theme-options-items app-skin" id="appSkinList">
@@ -294,8 +256,6 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Skins] !-->
-                <!--! BEGIN: [Typography] !-->
                 <div class="position-relative px-3 pb-3 pt-4 mt-3 mb-0 border border-gray-2 theme-options-set">
                     <label class="py-1 px-2 fs-8 fw-bold text-uppercase text-muted text-spacing-2 bg-white border border-gray-2 position-absolute rounded-2 options-label" style="top: -12px">Typography</label>
                     <div class="row g-2 theme-options-items font-family" id="fontFamilyList">
@@ -389,13 +349,10 @@
                         </div>
                     </div>
                 </div>
-                <!--! END: [Typography] !-->
             </div>
         </div>
     </div>
 
-    <!--! ================================================================ !-->
-    <!--! BEGIN: Vendors JS !-->
     <script src="assets/vendors/js/vendors.min.js"></script>
     <!-- vendors.min.js {always must need to be top} -->
     <script src="assets/vendors/js/daterangepicker.min.js"></script>

@@ -300,6 +300,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label fw-bold">Date of Issue</label>
                                         <input type="date" class="form-control" id="res_tanggal_terbentuk" name="tanggal_terbentuk">
+                                        <input type="hidden" name="save_mode" id="hidden_save_mode_passport" value="complete">
                                     </div>
                                 </div>
                             </div>
@@ -310,7 +311,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" id="btn-update-passport" class="btn btn-primary">Simpan</button>
+                        <button type="submit" class="btn btn-warning" formnovalidate onclick="document.getElementById('hidden_save_mode_passport').value = 'draft';">Simpan Sementara</button>
+                        <button type="submit" class="btn btn-primary" onclick="document.getElementById('hidden_save_mode_passport').value = 'complete';">Simpan</button>
                     </div>
                 </form>
             </div>

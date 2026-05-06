@@ -76,6 +76,27 @@ window.handleUpload = function(){
     const canvas = document.getElementById('canvas');
     const fileInput = document.getElementById('fileInput');
 
+    const formUpdateKtp = document.getElementById('formUpdateKtp');
+    if (formUpdateKtp) {
+        formUpdateKtp.reset();
+        formUpdateKtp.action = '/ktp/store'; 
+    }
+
+    const btnDraft = document.querySelector('#modalResultOCR #btnDraft');
+    if (btnDraft) {
+        btnDraft.style.display = 'inline-block';
+    }
+
+    const btnUtama = document.querySelector('#modalResultOCR #btn-update-ktp');
+    if (btnUtama) {
+        btnUtama.innerHTML = 'Simpan & Lengkapi';
+    }
+    
+    const opsionalTab = document.getElementById('opsionalFields');
+    if (opsionalTab && opsionalTab.classList.contains('show')) {
+        opsionalTab.classList.remove('show');
+    }
+
     if(canvas && !canvas.classList.contains('d-none')){
         canvas.toBlob((blob) => {
             formData.append('ktp_image_path', blob, 'ktp_scan.jpg');
@@ -167,6 +188,23 @@ window.handlePassportUpload = function(){
 
     btnSave.disabled = true;
     btnSave.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Uploading...`;
+
+    const formPaspor = document.getElementById('formUpdatePassport');
+    if (formPaspor) {
+        formPaspor.reset();
+        formPaspor.action = '/passport/store'; 
+    }
+
+    const btnDraft = document.getElementById('btnDraftPassport');
+    if (btnDraft) {
+        btnDraft.classList.remove('d-none'); // Copot jubah gaibnya
+        btnDraft.style.display = 'inline-block'; // Pastikan terlihat
+    }
+    // 3. KEMBALIKAN Teks Tombol Utama Paspor
+    const btnUtama = document.querySelector('#modalInputDataPassport #btn-update-passport');
+    if (btnUtama) {
+        btnUtama.innerHTML = 'Simpan & Lengkapi';
+    }
 
     const formData = new FormData();
     const canvas = document.getElementById('passportCanvas');
@@ -306,6 +344,26 @@ window.resetBtn = function(btn, text) {
 // ==========================================
 window.editDocument = function(id, type) {
     if (type === 'PASSPORT') {
+
+// 1. CARA AMPUH SEMBUNYIKAN TOMBOL DRAFT
+        let btnDraft = document.getElementById('btnDraftPassport');
+        if (btnDraft) {
+            btnDraft.style.display = ''; // Bersihkan style bawaan
+            btnDraft.classList.add('d-none'); // Pakaikan jubah gaib Bootstrap
+        }
+
+        // 2. UBAH TEKS TOMBOL UTAMA
+        let btnUtama = document.getElementById('btn-update-passport');
+        if (btnUtama) {
+            btnUtama.innerHTML = 'Update Perubahan';
+        }
+
+        // 3. UBAH ACTION FORM
+        let formPaspor = document.getElementById('formUpdatePassport');
+        if (formPaspor) {
+            formPaspor.action = '/passport/update/' + id;
+        }
+
         fetch(`/passport/edit/${id}`)
             .then(res => res.json())
             .then(data => {
@@ -339,6 +397,18 @@ window.editDocument = function(id, type) {
                 alert("Gagal ambil data Passport!");
             });
     } else if (type === 'KTP') {
+        let btnDraft = document.querySelector('#modalResultOCR #btnDraft');
+        if (btnDraft){
+            btnDraft.style.display = 'none';
+        }
+
+        let btnUtama = document.querySelector('#modalResultOCR #btn-update-ktp');
+        if (btnUtama){
+            btnUtama.innerHTML = 'Update Perubahan';
+        }
+
+        document.getElementById('formUpdateKtp').action = '/ktp/update/' + id;
+
         fetch(`/ktp/edit/${id}`)
             .then(res => res.json())
             .then(data => {
@@ -477,6 +547,44 @@ window.viewDocument = function(id, type) {
     }
 }
 
+function tambahKtpBaru(){
+    document.getElementById('formUpdateKtp').reset();
+
+    document.getElementById('formUpdateKtp').action = '/ktp/store';
+
+    let btnDraft = document.querySelector('#modalResultOCR #btnDraft');
+    if(btnDraft){
+        btnDraft.style.display = 'inline-block';
+    }
+
+    let btnUtama = document.querySelector('#modalResultOCR #btn-update-ktp');
+    if(btnUtama) {
+        btnUtama.innerHTML = 'Simpan & Lengkapi';
+    }
+
+    new bootstrap.Modal(document.getElementById('modalResultOCR')).show();
+}
+
+window.tambahPassportBaru = function() {
+    let formPaspor = document.getLEementById('formUpdatePassport');
+
+    if(formPaspor){
+        formPaspor.reset();
+        formPaspor.action = '/passport/store';
+    }
+
+    let btnDraft = document.querySelector('#modalInputDataPassport #btnDraftPassport');
+    if (btnDraft){
+        btnDraft.style.display = 'inline-block';
+    }
+
+    let btnUtama = document.querySelector('#modalInputDataPassport #btn-update-passport');
+    if (btnUtama){
+        btnUtama.innerHTML = 'Simpan & Lengkapi';
+    }
+
+    new bootstrap.Modal(document.getElementById('mdoalInputDataPassport')).show();
+}
 // =======================================================
 // EVENT LISTENERS FORM (HANYA JALAN SETELAH HALAMAN SIAP)
 // =======================================================
