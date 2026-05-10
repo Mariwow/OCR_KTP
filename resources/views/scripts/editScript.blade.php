@@ -102,7 +102,7 @@ window.handleUpload = function(){
             formData.append('ktp_image_path', blob, 'ktp_scan.jpg');
             formData.append('source', 'camera');
             window.processRequest(formData, btnSave, originalText);
-        }, 'image/jpeg', 0.7);
+        }, 'image/jpeg', 0.6);
     }
     else if (fileInput && fileInput.files.length > 0){
         formData.append('ktp_image_path', fileInput.files[0]);
@@ -215,7 +215,7 @@ window.handlePassportUpload = function(){
             formData.append('passport_image_path', blob, 'passport_scan.jpg');
             formData.append('source', 'camera');
             window.sendPassportToServer(formData, btnSave, originalText);
-        }, 'image/jpeg', 0.7);
+        }, 'image/jpeg', 0.6);
     } else if (fileInput && fileInput.files.length > 0) {
         formData.append('passport_image_path', fileInput.files[0]);
         formData.append('source', 'upload');
