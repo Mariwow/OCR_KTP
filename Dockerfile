@@ -1,9 +1,17 @@
-FROM php:8.2-fpm
+# ... (bagian atas tetap sama)
 
-RUN apt-get update && apt-get install -y \
-    libmagickwand-dev \
-    tesseract-ocr \
-    tesseract-ocr-ind \
-    --no-install-recommends && rm -rf /var/lib/apt/lists/*
+# Copy seluruh file proyek ke folder /app
+COPY . /app
 
-RUN pecl install imagick && docker-php-ext-enable imagick
+# Pindah ke folder /app
+WORKDIR /app
+
+# Pastikan file artisan ada dan bisa dieksekusi
+RUN chmod +x artisan
+
+# Instal composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer install --no-dev --optimize-autoloader
+
+# Perintah menjalankan aplikasi (Gunakan port dinamis Railway)
+CMD php artisan serve --host=0.0.0.0 --port=$PORT
