@@ -87,6 +87,7 @@ class ReadKtpController extends Controller
         
         $img = new \Imagick($originalImage);
 
+        // 1. TAHAP CROP (Khusus Camera)
         if($source == 'camera'){
             $width = $img->getImageWidth();
             $height = $img->getImageHeight();
@@ -98,53 +99,65 @@ class ReadKtpController extends Controller
                 intval($height * 0.23)
             );
             $img->setImagePage(0, 0, 0, 0);
-            $img->modulateImage(105, 130, 100);
-            
-            $img->contrastStretchImage(
-                $img->getQuantum() * 0.15, // Lebarkan area hitam
-                $img->getQuantum() * 0.15  // Lebarkan area putih
-            );
-            // $img     ->normalizeImage();
-            $img->gaussianBlurImage(0, 0.2);
         }
 
+        // ==========================================
+        // 2. TAHAP KALIBRASI OCR (BERLAKU UNTUK SEMUA)
+        // ==========================================
         
-        $img->sharpenImage(1,0.5);
+        // A. Ubah jadi Hitam Putih (Grayscale). 
+        // Ini KUNCI untuk meratakan HP yang saturasinya jelek/bagus.
+        $img->transformimagecolorspace(\Imagick::COLORSPACE_GRAY);
 
+        // B. Terangkan sedikit gambarnya (Brightness 110%, Saturation 100% karena sudah abu-abu)
+        $img->modulateImage(110, 100, 100);
+        
+        // C. Tarik Kontras Ekstrem (Bikin huruf makin hitam pekat, background makin putih bersih)
+        // Kita lebarkan titik hitam di 15% dan titik putih di 90%
+        $img->contrastStretchImage(
+            $img->getQuantum() * 0.15, 
+            $img->getQuantum() * 0.80  
+        );
+        
+        // D. Hapus noise/bintik debu ringan
+        $img->gaussianBlurImage(0, 0.5);
+
+        // E. Pertajam tepi huruf setelah di-blur (Naikkan angkanya dari kodemu sebelumnya)
+        $img->sharpenImage(2, 1);
+
+        // ==========================================
+
+        // Simpan gambar utama yang sudah di-processing
         $img->writeImage($processedImage);
 
         if($source == 'camera'){
             $img->writeImage($originalImage); 
         }
 
-        $nikImg = clone $img; // Clone agar tidak merusak gambar KTP utuh
+        // 3. TAHAP CROP NIK (Sesuai kodemu)
+        $nikImg = clone $img; 
         $cardW = $nikImg->getImageWidth();
         $cardH = $nikImg->getImageHeight();
 
         $nikImg->cropImage(
-        intval($cardW * 0.75), // Lebar potongan NIK
-        intval($cardH * 0.20), // Tinggi potongan NIK
-        intval($cardW * 0), // Koordinat X (Geser ke kanan sedikit dari label "NIK")
-        intval($cardH * 0.15)  // Koordinat Y (Turun sedikit dari header "PROVINSI")
+            intval($cardW * 0.75), 
+            intval($cardH * 0.17), 
+            intval($cardW * 0),    
+            intval($cardH * 0.12)  
         );
         $nikImg->setImagePage(0, 0, 0, 0);
         
         $nikImg->writeImage($nikCropPath);
 
-        // Bersihkan Memori
+        // Bersihkan Memori Imagick
         $img->clear();
         $img->destroy();
         $nikImg->clear();
         $nikImg->destroy();
 
-
-        // 1. OCR Seluruh KTP (Bahasa Indonesia)
+        // 4. EKSEKUSI TESSERACT
         exec("tesseract \"$processedImage\" \"$outputPath\" -l ind --psm 6");
-        
-        // 2. OCR Khusus NIK (Hanya Angka / Whitelist)
-        // --psm 7 cocok untuk satu baris teks tunggal
         exec("tesseract \"$nikCropPath\" \"$nikOutputPath\" -l eng --psm 6");
-            // exec("tesseract \"$nikImage\" \"$nikOutput\" --psm 6 -c tessedit_char_whitelist=0123456789");
 
         $fullText = file_get_contents($outputPath . '.txt');
         $nikText = trim(file_get_contents($nikOutputPath . '.txt'));
@@ -152,16 +165,14 @@ class ReadKtpController extends Controller
         $cleanText = $this->cleanOcrText($fullText);
         $parsed = $this->parseKtp($cleanText);
 
-        // 1. Bersihkan dari spasi, huruf, atau simbol (Sisakan angka saja)
+        // Pembersihan NIK
         $nikDigitsOnly = preg_replace('/[^0-9]/', '', $nikText);
-
-        // 2. Ambil 16 angka pertama saja (Substr)
         $nikFinal = substr($nikDigitsOnly, 0, 16);
 
-        // 3. Masukkan ke parsed data jika hasilnya tepat 16 digit
         if (strlen($nikFinal) === 16) {
             $parsed['nik'] = $nikFinal;
         }
+
         // Normalisasi & Update
         if (!empty($parsed['tanggal_lahir'])){
             $parsed['tanggal_lahir'] = $this->normalizeDate($parsed['tanggal_lahir']);
@@ -191,6 +202,7 @@ class ReadKtpController extends Controller
             'TEMPATTGILAHIR' => 'TEMPAT/TGL LAHIR',
             'TEMPAYTGILAHIR' => 'TEMPAT/TGL LAHIR',
             'TEMPAYTGI LAHIR' => 'TEMPAT/TGL LAHIR',
+            'TEMPATTGILAHU' => 'TEMPAT/TGL LAHIR',
             'DENAK EAMIN' => 'JENIS KELAMIN',
             'DENAKEAMIN' => 'JENIS KELAMIN',
             'ALAMAI' => 'ALAMAT',
@@ -247,8 +259,7 @@ class ReadKtpController extends Controller
 
         $teksSatuBaris = trim(preg_replace('/\s+/', ' ', strtoupper($text)));
 
-        // =========== 1. JALUR VIP DKI JAKARTA (ANTI-GAGAL) ===========
-        // Karena spasinya sudah rapi dan enternya hilang, strpos pasti bisa menemukannya!
+
         if (strpos($teksSatuBaris, 'JAKARTA SELATAN') !== false) {
             $data['kabupaten'] = 'JAKARTA SELATAN';
             $data['provinsi']  = 'DKI JAKARTA';
@@ -329,13 +340,10 @@ class ReadKtpController extends Controller
                 }
             }
 
-        if (preg_match('/ALAMAT[^A-Z0-9]*([^\n]+)/i', $text, $m)){
-            $alamatRaw = strtoupper($m[1]); // Hasil: "DSN.- NGROTO baa"
-            
-            // Hapus semua karakter KECUALI huruf, angka, titik, dan spasi (Strip akan hilang)
-            $alamatClean = preg_replace('/[^A-Z0-9\.\s]/', ' ', $alamatRaw); // Hasil: "DSN . NGROTO baa"
-            
-            // Buang huruf abjad tunggal di ujung (opsional) dan rapikan spasi ganda
+        if (preg_match('/ALAMAT[^A-Z0-9]*([^\r\n]+)/i', $text, $m)){
+            $alamatRaw = strtoupper($m[1]); 
+            $alamatRaw = str_replace(["\r", "\n"], ' ', $alamatRaw);
+            $alamatClean = preg_replace('/[^A-Z0-9\.\s]/', ' ', $alamatRaw); 
             $alamatClean = trim(preg_replace('/\s+/', ' ', $alamatClean));
             
             $data['alamat'] = $alamatClean;   

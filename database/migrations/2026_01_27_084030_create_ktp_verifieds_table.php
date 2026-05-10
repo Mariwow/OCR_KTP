@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('tempat_lahir');
             $table->date('tanggal_lahir'); 
             $table->string('jenis_kelamin', 20);
-            $table->string('alamat');
+            $table->text('alamat');
             $table->string('rt_rw');
             $table->string('kel_desa');
             $table->string('kecamatan');

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('tempat_lahir')->nullable();
             $table->date('tanggal_lahir')->nullable();
             $table->string('jenis_kelamin', 20)->nullable();
-            $table->string('alamat')->nullable();
+            $table->text('alamat')->nullable();
             $table->string('rt_rw')->nullable();
             $table->string('kel_desa')->nullable();
             $table->string('kecamatan')->nullable();
