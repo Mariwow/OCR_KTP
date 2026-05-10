@@ -465,5 +465,11 @@
     @include('modals.editKtp')    
     @include('scripts.editScript')
     @include('modals.status')
+    <script>
+        // Memaksa browser mengabaikan error bootstrap yang macet
+        window.onerror = function(message, source, lineno, colno, error) {
+            if (message.includes('classList')) return true;
+        };
+    </script>
 </body>
 </html>
