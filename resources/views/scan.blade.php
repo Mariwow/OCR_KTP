@@ -9,6 +9,7 @@
     <meta name="keyword" content="">
     <meta name="author" content="theme_ocean">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; object-src 'self';">
 
     <title>Trihaka | Scan</title>
 
