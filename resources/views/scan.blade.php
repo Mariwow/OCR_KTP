@@ -9,6 +9,7 @@
     <meta name="keyword" content="">
     <meta name="author" content="theme_ocean">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; object-src 'self';">
 
     <title>Trihaka | Scan</title>
 
@@ -366,6 +367,12 @@
     <!--! END: Apps Init !-->
     <!--! BEGIN: Theme Customizer  !-->
     <script src="assets/js/theme-customizer-init.min.js"></script>
+     <script>
+        // Memaksa browser mengabaikan error bootstrap yang macet
+        window.onerror = function(message, source, lineno, colno, error) {
+            if (message.includes('classList')) return true;
+        };
+    </script>
     <!--! END: Theme Customizer !-->
 
     <!--! MODAL SCAN KTP !-->
@@ -464,5 +471,6 @@
     @include('modals.editKtp')    
     @include('scripts.editScript')
     @include('modals.status')
+   
 </body>
 </html>
