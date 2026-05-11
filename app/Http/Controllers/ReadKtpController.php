@@ -99,6 +99,8 @@ class ReadKtpController extends Controller
                 intval($height * 0.23)
             );
             $img->setImagePage(0, 0, 0, 0);
+
+            $img->writeImage($originalImage);
         }
 
         // ==========================================
@@ -107,17 +109,14 @@ class ReadKtpController extends Controller
         
         // A. Ubah jadi Hitam Putih (Grayscale). 
         // Ini KUNCI untuk meratakan HP yang saturasinya jelek/bagus.
-        $img->transformimagecolorspace(\Imagick::COLORSPACE_GRAY);
+        // $img->transformimagecolorspace(\Imagick::COLORSPACE_GRAY);
 
         // B. Terangkan sedikit gambarnya (Brightness 110%, Saturation 100% karena sudah abu-abu)
         $img->modulateImage(110, 100, 100);
         
         // C. Tarik Kontras Ekstrem (Bikin huruf makin hitam pekat, background makin putih bersih)
         // Kita lebarkan titik hitam di 15% dan titik putih di 90%
-        $img->contrastStretchImage(
-            $img->getQuantum() * 0.15, 
-            $img->getQuantum() * 0.80  
-        );
+        // $img->sigmoidalContrastImage(true, 4.5, $img->getQuantum() * 0.5);
         
         // D. Hapus noise/bintik debu ringan
         $img->gaussianBlurImage(0, 0.5);
@@ -129,10 +128,6 @@ class ReadKtpController extends Controller
 
         // Simpan gambar utama yang sudah di-processing
         $img->writeImage($processedImage);
-
-        if($source == 'camera'){
-            $img->writeImage($originalImage); 
-        }
 
         // 3. TAHAP CROP NIK (Sesuai kodemu)
         $nikImg = clone $img; 
@@ -203,6 +198,7 @@ class ReadKtpController extends Controller
             'TEMPAYTGILAHIR' => 'TEMPAT/TGL LAHIR',
             'TEMPAYTGI LAHIR' => 'TEMPAT/TGL LAHIR',
             'TEMPATTGILAHU' => 'TEMPAT/TGL LAHIR',
+            'AMPATTGILAHU' => 'TEMPAT/TGL LAHIR',
             'DENAK EAMIN' => 'JENIS KELAMIN',
             'DENAKEAMIN' => 'JENIS KELAMIN',
             'ALAMAI' => 'ALAMAT',
