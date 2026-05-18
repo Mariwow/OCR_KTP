@@ -30,6 +30,7 @@ class ReadKtp extends Model
         'golongan_darah',
         'berlaku_sampai',
         'ktp_image_path',
+        'no_telp',
         'ocr_raw_text',
         'status',
         'uploaded_by',

@@ -24,19 +24,21 @@ return new class extends Migration
             $table->string('rt_rw');
             $table->string('kel_desa');
             $table->string('kecamatan');
-            $table->string('kabupaten')->nullable();
-            $table->string('provinsi')->nullable();
-            $table->string('agama');
-            $table->string('status_perkawinan');
+            $table->string('kabupaten');
+            $table->string('provinsi');
+            $table->string('agama')->nullable();
+            $table->string('status_perkawinan')->nullable();
             $table->string('pekerjaan');
-            $table->string('kewarganegaraan');
+            $table->string('kewarganegaraan')->nullable();
             $table->string('berlaku_sampai')->nullable();
-            $table->unsignedBigInteger('verified_by')->nullable();
+            $table->unsignedBigInteger('verified_by');
 
             $table->string('ktp_image_path');
             
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
+
+            $table->string('no_telp')->nullable();
 
             $table->foreign('submission_id')
                   ->references('id')

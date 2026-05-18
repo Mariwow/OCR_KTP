@@ -36,7 +36,7 @@
 <body>
     <!-- Modal hasil OCR !-->
     <div class="modal fade" id="modalViewDataKtp" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content shadow-lg">
                 <div class="modal-header bg-light">
                     <h5 class="modal-title fw-bold"><i class="bi bi-person-check-fill me-2"> </i>Data KTP</h5>
@@ -47,73 +47,80 @@
                     <input type="hidden" id="view_id_ktp" name="id">
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-12 mb-4 text-center">
-                                <label class="form-label d-block fw-bold text-muted">Foto KTP</label>
-                                <img id="view_img_preview_ktp" src=""  class="img-fluid rounded border shadow-sm img-zoomable" style="max-height: 200px;" alt="preview KTP" onclick="toggleZoom(this)">
+
+                            <div class="col-lg-5 mb-4 text-center border-end">
+                                <div class="sticky-top" style="top: 10px; z-index: 1;">
+                                    <label class="form-label d-block fw-bold text-muted">Foto KTP</label>
+                                    <img id="view_img_preview_ktp" src=""  class="img-fluid rounded border shadow-sm img-zoomable" style="max-height: 200px;" alt="preview KTP" onclick="toggleZoom(this)">
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">NIK</label>
-                                <input type="text" class="form-control" id="view_nik" name="nik" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Nama</label>
-                                <input type="text" class="form-control" id="view_nama_ktp" name="nama" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Tempat Lahir</label>
-                                <input type="text" class="form-control" id="view_tempat_lahir_ktp" name="tempat_lahir" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Tanggal Lahir</label>
-                                <input type="text" class="form-control" id="view_tanggal_lahir_ktp" name="tanggal_lahir" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">Jenis Kelamin</label>
-                                <input type="text" class="form-control" id="view_jenis_kelamin_ktp" name="jenis_kelamin" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">Alamat</label>
-                                <input type="text" class="form-control" id="view_alamat" name="alamat" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">RT RW</label>
-                                <input type="text" class="form-control" id="view_rt_rw" name="rt_rw" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">Kelurahan/Desa</label>
-                                <input type="text" class="form-control" id="view_kel_desa" name="kel_desa" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">Kecamatan</label>
-                                <input type="text" class="form-control" id="view_kecamatan" name="kecamatan" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">Kabupaten</label>
-                                <input type="text" class="form-control" id="view_kabupaten" name="kabupaten" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">Provinsi</label>
-                                <input type="text" class="form-control" id="view_provinsi" name="provinsi" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">Agama</label>
-                                <input type="text" class="form-control" id="view_agama" name="agama" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">Status Perkawinan</label>
-                                <input type="text" class="form-control" id="view_status_perkawinan" name="status_perkawinan" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">Pekerjaan</label>
-                                <input type="text" class="form-control" id="view_pekerjaan" name="pekerjaan" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">Kewarganegaraan</label>
-                                <input type="text" class="form-control" id="view_kewarganegaraan" name="kewarganegaraan" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">  
-                                <label class="form-label fw-bold">Berlaku Hingga</label>
-                                <input type="text" class="form-control" id="view_berlaku_sampai" name="berlaku_sampai" readonly>
+                            <div class="col-lg-7">
+                                <div class="row px-2">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">NIK</label>
+                                        <input type="text" class="form-control" id="view_nik" name="nik" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Nama</label>
+                                        <input type="text" class="form-control" id="view_nama_ktp" name="nama" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Tempat Lahir</label>
+                                        <input type="text" class="form-control" id="view_tempat_lahir_ktp" name="tempat_lahir" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Tanggal Lahir</label>
+                                        <input type="text" class="form-control" id="view_tanggal_lahir_ktp" name="tanggal_lahir" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">Jenis Kelamin</label>
+                                        <input type="text" class="form-control" id="view_jenis_kelamin_ktp" name="jenis_kelamin" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">Alamat</label>
+                                        <input type="text" class="form-control" id="view_alamat" name="alamat" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">RT RW</label>
+                                        <input type="text" class="form-control" id="view_rt_rw" name="rt_rw" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">Kelurahan/Desa</label>
+                                        <input type="text" class="form-control" id="view_kel_desa" name="kel_desa" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">Kecamatan</label>
+                                        <input type="text" class="form-control" id="view_kecamatan" name="kecamatan" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">Kabupaten</label>
+                                        <input type="text" class="form-control" id="view_kabupaten" name="kabupaten" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">Provinsi</label>
+                                        <input type="text" class="form-control" id="view_provinsi" name="provinsi" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">Agama</label>
+                                        <input type="text" class="form-control" id="view_agama" name="agama" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">Status Perkawinan</label>
+                                        <input type="text" class="form-control" id="view_status_perkawinan" name="status_perkawinan" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">Pekerjaan</label>
+                                        <input type="text" class="form-control" id="view_pekerjaan" name="pekerjaan" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">Kewarganegaraan</label>
+                                        <input type="text" class="form-control" id="view_kewarganegaraan" name="kewarganegaraan" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">  
+                                        <label class="form-label fw-bold">Berlaku Hingga</label>
+                                        <input type="text" class="form-control" id="view_berlaku_sampai" name="berlaku_sampai" readonly>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

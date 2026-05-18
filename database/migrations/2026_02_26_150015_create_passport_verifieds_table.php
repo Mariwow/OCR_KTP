@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('submission_id');
 
-            $table->string('kode_negara', 3)->nullable();
-            $table->string('no_paspor')->nullable();
-            $table->string('nama')->nullable();
-            $table->string('kewarganegaraan')->nullable();
-            $table->string('jenis_kelamin')->nullable();
+            $table->string('kode_negara', 3);
+            $table->string('no_paspor');
+            $table->string('nama');
+            $table->string('kewarganegaraan');
+            $table->string('jenis_kelamin');
             $table->date('tanggal_lahir')->nullable();
             $table->string('tempat_lahir')->nullable();
             $table->date('masa_berlaku')->nullable();
@@ -28,6 +28,8 @@ return new class extends Migration
 
             $table->unsignedBigInteger('verified_by');
             $table->string('passport_image_path');
+
+            $table->string('no_telp')->nullable();
 
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();

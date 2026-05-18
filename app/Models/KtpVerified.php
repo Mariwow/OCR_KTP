@@ -28,6 +28,7 @@ class KtpVerified extends Model
         'kewarganegaraan',
         'berlaku_sampai',
         'ktp_image_path',
+        'no_telp',
         'verified_by'
     ];
 

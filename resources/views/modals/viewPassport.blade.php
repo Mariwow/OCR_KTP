@@ -36,7 +36,7 @@
 <body>
     <!-- Modal Data passport !-->
     <div class="modal fade" id="modalViewDataPassport" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content shadow-lg">
                 <div class="modal-header bg-light">
                     <h5 class="modal-title fw-bold"><i class="bi bi-person-check-fill me-2"> </i>Data Passport</h5>
@@ -47,45 +47,51 @@
                     <input type="hidden" id="view_id_passport" name="id">
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-12 mb-4 text-center">
-                                <label class="form-label d-block fw-bold text-muted">Foto Passport</label>
-                                <img id="view_img_preview_passport" src=""  class="img-fluid rounded border shadow-sm img-zoomable" style="max-height: 200px;" alt="preview Passport" onclick="toggleZoom(this)">
+                            <div class="col-lg-5 mb-4 text-center border-end">
+                                <div class="sticky-top" style="top: 10px; z-index: 1;">
+                                    <label class="form-label d-block fw-bold text-muted">Foto Passport</label>
+                                    <img id="view_img_preview_passport" src=""  class="img-fluid rounded border shadow-sm img-zoomable" style="max-height: 200px;" alt="preview Passport" onclick="toggleZoom(this)">
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Country Code</label>
-                                <input type="text" class="form-control" id="view_kode_negara" name="kode_negara" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Passport Number</label>
-                                <input type="text" class="form-control" id="view_no_paspor" name="no_paspor" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Name</label>
-                                <input type="text" class="form-control" id="view_nama_paspor" name="nama" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Nationality</label>
-                                <input type="text" class="form-control" id="view_kewarganegaraan_paspor" name="kewarganegaraan" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Type (Gender)</label>
-                                <input type="text" class="form-control" id="view_jenis_kelamin_paspor" name="jenis_kelamin" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Birth Date</label>
-                                <input type="date" class="form-control" id="view_tanggal_lahir_paspor" name="tanggal_lahir" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Place of Birth</label>
-                                <input type="text" class="form-control" id="view_tempat_lahir_paspor" name="tempat_lahir" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Expire Date</label>
-                                <input type="date" class="form-control" id="view_masa_berlaku" name="masa_berlaku" readonly>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Date of Issue</label>
-                                <input type="date" class="form-control" id="view_tanggal_terbentuk" name="tanggal_terbentuk" readonly>
+                            <div class="col-lg-7">
+                                <div class="row px-2">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Country Code</label>
+                                        <input type="text" class="form-control" id="view_kode_negara" name="kode_negara" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Passport Number</label>
+                                        <input type="text" class="form-control" id="view_no_paspor" name="no_paspor" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Name</label>
+                                        <input type="text" class="form-control" id="view_nama_paspor" name="nama" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Nationality</label>
+                                        <input type="text" class="form-control" id="view_kewarganegaraan_paspor" name="kewarganegaraan" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Type (Gender)</label>
+                                        <input type="text" class="form-control" id="view_jenis_kelamin_paspor" name="jenis_kelamin" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Birth Date</label>
+                                        <input type="date" class="form-control" id="view_tanggal_lahir_paspor" name="tanggal_lahir" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Place of Birth</label>
+                                        <input type="text" class="form-control" id="view_tempat_lahir_paspor" name="tempat_lahir" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Expire Date</label>
+                                        <input type="date" class="form-control" id="view_masa_berlaku" name="masa_berlaku" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Date of Issue</label>
+                                        <input type="date" class="form-control" id="view_tanggal_terbentuk" name="tanggal_terbentuk" readonly>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -34,6 +34,8 @@ return new class extends Migration
             $table->string('ktp_image_path');
             $table->longText('ocr_raw_text')->nullable();
 
+            $table->string('no_telp')->nullable();
+
             $table->string('status');
 
             $table->unsignedBigInteger('uploaded_by')->nullable();

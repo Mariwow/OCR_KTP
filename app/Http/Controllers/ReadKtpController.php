@@ -7,44 +7,121 @@ use Illuminate\Http\Request;
 use App\Models\ReadKtp;
 use Illuminate\Support\Facades\Storage;
 use App\Services\KtpImageProcessingService;
+use Carbon\Carbon;
 
 class ReadKtpController extends Controller
 {
     public function update(Request $request)
     {
-        $isDraft = $request->input('save_mode') === 'draft';
-
-        $validated = $request->validate([
-            'nik' => 'required|string|size:16',
-            'nama' => 'required|string',
-            'tempat_lahir' => 'nullable|string',
-            'tanggal_lahir' => 'nullable|date',
-            'jenis_kelamin' => 'nullable|string',
-            'alamat' => 'nullable|string',
-            'rt_rw' => 'nullable|string',
-            'kel_desa' => 'nullable|string',
-            'kecamatan' => 'nullable|string',
-            'kabupaten' => 'nullable|string',
-            'provinsi' => 'nullable|string',
-            'agama' => 'nullable|string',
-            'status_perkawinan' => 'nullable|string',
-            'pekerjaan' => 'nullable|string',
-            'kewarganegaraan' => 'nullable|string',
-            'golongan_darah' => 'nullable|string',
-            'berlaku_sampai' => 'nullable|string'
-        ]);
-
         $ktp = ReadKtp::findOrFail($request->id);
 
-        $ktp->update($validated);
-        $statusAkhir = $isDraft ? 'Pending' : 'Verified';
-        $ktp->update(['status' => $statusAkhir]);
+        $validated = $request->validate([
+            'nik'               => 'nullable|string',
+            'nama'              => 'required|string',
+            'tempat_lahir'      => 'nullable|string',
+            'tanggal_lahir'     => 'nullable|date',
+            'jenis_kelamin'     => 'nullable|string',
+            'alamat'            => 'nullable|string',
+            'rt_rw'             => 'nullable|string',
+            'kel_desa'          => 'nullable|string',
+            'kecamatan'         => 'nullable|string',
+            'kabupaten'         => 'nullable|string',
+            'provinsi'          => 'nullable|string',
+            'agama'             => 'nullable|string',
+            'status_perkawinan' => 'nullable|string',
+            'pekerjaan'         => 'nullable|string',
+            'kewarganegaraan'   => 'nullable|string',
+            'golongan_darah'    => 'nullable|string',
+            'berlaku_sampai'    => 'nullable|string',
+            'no_telp'           => 'nullable|string'
+        ]);
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => $isDraft ? 'Disimpan sebagai Draft' : 'Verified KTP',
-            'data' => $ktp
-        ], 201);
+        $requiredFields = [
+        'nik', 'nama', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 
+        'alamat', 'rt_rw', 'kel_desa', 'kecamatan', 'kabupaten', 
+        'provinsi', 'pekerjaan', 'no_telp'
+        ];
+
+        $isComplete = true;
+        foreach ($requiredFields as $field) {
+            if (empty($request->$field)) {
+                $isComplete = false;
+                break;
+            }
+        }
+
+        $actionRole = $request->input('action_role', 'fo');
+
+        // 3. JIKA DATA BELUM LENGKAP (FO atau Admin yang isi)
+        if (!$isComplete) {
+            // Jika ADMIN yang klik, TOLAK dan jangan tutup modalnya!
+            if ($actionRole === 'admin') {
+                return response()->json([
+                    'status'  => 'warning',
+                    'message' => 'Gagal Verifikasi! Masih ada kolom yang kosong. Silakan lengkapi terlebih dahulu.'
+                ]);
+            }
+
+            // Jika FO yang klik, boleh disimpan sementara sebagai pending
+            $ktp->update(array_merge($validated, ['status' => 'pending']));
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Data disimpan sebagai Pending (masih ada kolom kosong).'
+            ]);
+        }
+
+        if ($actionRole === 'admin') {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+            try {
+                // Update data utamanya dulu
+                $ktp->update(array_merge($validated, ['status' => 'Done']));
+
+                // Pindahkan ke Tabel KtpVerified
+                \App\Models\KtpVerified::create([
+                    'submission_id'     => $ktp->id,
+                    'nik'               => $ktp->nik,
+                    'nama'              => $ktp->nama,
+                    'tempat_lahir'      => $ktp->tempat_lahir,
+                    'tanggal_lahir'     => $ktp->tanggal_lahir,
+                    'jenis_kelamin'     => $ktp->jenis_kelamin,
+                    'alamat'            => $ktp->alamat,
+                    'rt_rw'             => $ktp->rt_rw,
+                    'kel_desa'          => $ktp->kel_desa,
+                    'kecamatan'         => $ktp->kecamatan,
+                    'kabupaten'         => $ktp->kabupaten,
+                    'provinsi'          => $ktp->provinsi,
+                    'agama'             => $ktp->agama,
+                    'status_perkawinan' => $ktp->status_perkawinan,
+                    'pekerjaan'         => $ktp->pekerjaan,
+                    'kewarganegaraan'   => $ktp->kewarganegaraan,
+                    'golongan_darah'    => $ktp->golongan_darah,
+                    'berlaku_sampai'    => $ktp->berlaku_sampai,
+                    'ktp_image_path'    => $ktp->ktp_image_path,
+                    'no_telp'           => $ktp->no_telp,
+                    'verified_by'       => auth()->id(), 
+                ]);
+
+                \Illuminate\Support\Facades\DB::commit();
+
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'Lengkap! Data Diverifikasi dan Dipindah ke Arsip.'
+                ]);
+
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\DB::rollback();
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Gagal memindahkan data ke tabel Verified: ' . $e->getMessage()
+                ], 500);
+            }
+        }else {
+            $ktp->update(array_merge($validated, ['status' => 'verified']));
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Data Lengkap & Menunggu Verifikasi Admin.'
+            ]);
+        }
     }
 
     public function upload(Request $request)
@@ -100,7 +177,10 @@ class ReadKtpController extends Controller
             );
             $img->setImagePage(0, 0, 0, 0);
 
-            $img->writeImage($originalImage);
+            $this->applyLogo($img, $originalImage);
+        }
+        else {
+            $this->applyLogo($img, $originalImage);
         }
 
         // ==========================================
@@ -179,6 +259,34 @@ class ReadKtpController extends Controller
         ]));
 
         return $ktp->refresh();
+    }
+
+   private function applyLogo(\Imagick $img, $savePath)
+    {
+$logoPath = public_path('assets/images/logo_low_transparency.png'); 
+
+
+        if (!file_exists($logoPath)) {
+            throw new \Exception("ERROR LOGO: File logo tidak ditemukan di jalur: " . $logoPath);
+        }
+
+        $storageImg = clone $img; 
+        $logo = new \Imagick($logoPath);
+        
+        $logoWidth = $storageImg->getImageWidth() * 0.15;
+        $logo->scaleImage($logoWidth, 0);
+
+        $x = $storageImg->getImageWidth() - $logo->getImageWidth() - 20;
+        $y = 20;
+
+        $storageImg->compositeImage($logo, \Imagick::COMPOSITE_OVER, $x, $y);
+        
+        file_put_contents($savePath, $storageImg->getImageBlob());
+
+        $logo->clear();
+        $logo->destroy();
+        $storageImg->clear();
+        $storageImg->destroy();
     }
 
     private function cleanOcrText($text)
@@ -322,7 +430,7 @@ class ReadKtpController extends Controller
         if (preg_match('/(LAKI-LAKI|LAKI\sLAKI|LAKILAKI|KALI|PEREMPUAN)/i', $text, $m)) {
             
             $jenis_kelamin = strtoupper($m[1]);
-            if (strpos($jenis_kelamin, 'LAKI') !== false) {
+            if (strpos($jenis_kelamin, 'LAKI') !== false || strpos($jenis_kelamin, 'KALI') !== false) {
                 $data['jenis_kelamin'] = 'LAKI-LAKI';
             } else {
                 $data['jenis_kelamin'] = 'PEREMPUAN';

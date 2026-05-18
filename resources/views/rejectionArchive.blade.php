@@ -320,12 +320,10 @@
                                                 </td>
                                                 <td class="text-center">{{ $data->created_at->format('d/m/Y H:i') }}</td>
                                                 <td class="text-center">
-                                                    <span class="text-truncate-1-line fw-semibold">{{ $data->display_user }}
-                                                    </span>
+                                                    <span class="text-truncate-1-line fw-semibold">{{ $data->display_user }}</span>
                                                 </td>
                                                 <td>
-                                                    <span class="text-truncate-1-line">{{ $data->display_note }}
-                                                    </span>
+                                                    <span class="text-truncate-1-line">{{ $data->display_note }}</span>
                                                 </td>
                                                 <td>
                                                     <div class="hstack gap-2 justify-content-end">
@@ -373,14 +371,18 @@
             </div>
         </div>
     </div>
+
+    <form id="hiddenRestoreForm" method="POST" style="display: none;">
+        @csrf
+    </form>
+
     @include('modals.viewPassport')
     @include('modals.viewKtp')
     @include('scripts.editScript')
-    @include('modals.status')
+
 
     <!--! BEGIN: Vendors JS !-->
     <script src="assets/vendors/js/vendors.min.js"></script>
-    <!-- vendors.min.js {always must need to be top} -->
     <script src="assets/vendors/js/daterangepicker.min.js"></script>
     <script src="assets/vendors/js/apexcharts.min.js"></script>
     <script src="assets/vendors/js/jquery.time-to.min.js "></script>
@@ -396,28 +398,72 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ 
+    @include('scripts.editScript')
+ 
     <script>
         $(document).ready(function() {
             $('#myTable').DataTable({
-                "pageLength": 10, // Default jumlah data yang tampil
-                "ordering": true, // Mengaktifkan fitur sorting klik di header tabel
-                "info": true      // Menampilkan tulisan "Showing 1 to 10 of 50 entries"
+                "pageLength": 10,
+                "ordering": true,
+                "info": true
             });
-        }); 
-
+        });
+ 
         function prepareRestore(id, type) {
-            // 1. Buat URL tujuan ke Route backend kamu
-            // Sesuaikan prefix '/verify/restore' dengan route yang ada di web.php kamu
-            const url = `/verify/restore/${id}/${type}`;
-            
-            // 2. Tempelkan URL tersebut ke action form di dalam modal
-            document.getElementById('formRestore').action = url;
-            
-            // 3. Tampilkan modalnya ke layar
-            new bootstrap.Modal(document.getElementById('modalRestore')).show();
+            Swal.fire({
+                title: 'Pulihkan Data?',
+                text: "Data ini akan dipulihkan dan kembali ke halaman konfirmasi.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                cancelButtonText: 'Batal',
+                confirmButtonText: 'Ya, Pulihkan!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    $('body').css({ 'overflow': '', 'padding-right': '' });
+ 
+                    let form = document.getElementById('hiddenRestoreForm');
+                    form.action = `/verify/restore/${id}/${type}`;
+                    form.submit();
+                }
+            });
         }
-
     </script>
+ 
+    @if(session('error'))
+    <script>
+        Swal.fire({
+            title: 'Gagal!',
+            text: "{!! session('error') !!}",
+            icon: 'error',
+            confirmButtonText: 'OK'
+        }).then(() => {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+            $('body').css({ 'overflow': '', 'padding-right': '' });
+        });
+    </script>
+    @endif
+ 
+    @if(session('success'))
+    <script>
+        Swal.fire({
+            title: 'Sukses!',
+            text: "{!! session('success') !!}",
+            icon: 'success',
+            confirmButtonText: 'OK'
+        }).then(() => {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+            $('body').css({ 'overflow': '', 'padding-right': '' });
+        });
+    </script>
+    @endif
 
 </body>
 </html>

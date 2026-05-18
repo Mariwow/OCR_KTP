@@ -22,6 +22,7 @@ class Passport extends Model
         'no_reg',
         'uploaded_by',
         'passport_image_path',
+        'no_telp',
         'status',
         'note'
     ];

@@ -91,7 +91,8 @@ class DashboardController extends Controller
     public function reportsAdmin()
     {
 
-        $ktps = ReadKtp::where('status', 'verified')
+        $ktps = ReadKtp::with('user')
+            ->whereNotIn('status', ['done', 'Done', 'rejected', 'Rejected', 'reject', 'Reject'])
             ->latest()
             ->get()
             ->map(function ($item) {
@@ -100,11 +101,13 @@ class DashboardController extends Controller
                 $item->display_number = $item->nik;
                 $item->setAttribute('image', $item->ktp_image_path);
                 $item->display_date = $item->date;
-                $item->display_user = $item->user->name;
+                $item->display_user = optional($item->user)->name ?? 'System';
+                $item->display_status = $item->status;
                 return $item;
             });
 
-        $passports = Passport::where('status', 'verified')  
+        $passports = Passport::with('user')  
+            ->whereNotIn('status', ['done', 'Done', 'rejected', 'Rejected', 'reject', 'Reject'])
             ->latest()
             ->get()
             ->map(function ($item) {
@@ -113,7 +116,9 @@ class DashboardController extends Controller
                 $item->display_number = $item->no_paspor;
                 $item->image = $item->passport_image_path;
                 $item->display_date = $item->date;
-                $item->display_user = $item->user->name;
+                $item->display_user = optional($item->user)->name ?? 'System';
+                $item->display_status = $item->status;
+                
                 return $item;
             });
 
@@ -123,13 +128,19 @@ class DashboardController extends Controller
         return view('confirmation', compact('recentUploadsAdmin'));
     }
     
-    public function acceptData($id, $type)
+public function acceptData($id, $type)
     {
         try {
             DB::beginTransaction();
 
             if ($type === 'KTP') {
                 $source = ReadKtp::findOrFail($id);
+
+                // 1. JARING PENCEGAT DATA KOSONG (KTP)
+                if (empty($source->nik) || empty($source->nama) || empty($source->tempat_lahir) || empty($source->tanggal_lahir) || empty($source->jenis_kelamin) || empty($source->alamat)) {
+                    DB::rollback(); // Batalkan transaksi awal
+                    return back()->with('error', 'Gagal Verifikasi! Data utama KTP (NIK, Nama, Tempat/Tanggal Lahir, Jenis Kelamin, Alamat) masih kosong. Silakan klik tombol Edit terlebih dahulu.');
+                }
 
                 KtpVerified::create([
                     'submission_id'     => $source->id,
@@ -151,6 +162,7 @@ class DashboardController extends Controller
                     'golongan_darah'    => $source->golongan_darah,
                     'berlaku_sampai'    => $source->berlaku_sampai,
                     'ktp_image_path'    => $source->ktp_image_path,
+                    'no_telp'           => $source->no_telp,
                     'verified_by'       => auth()->id(), 
                 ]);
 
@@ -159,20 +171,27 @@ class DashboardController extends Controller
             } else if ($type === 'PASSPORT') {
                 $source = Passport::findOrFail($id);
 
+                // 2. JARING PENCEGAT DATA KOSONG (PASSPORT)
+                if (empty($source->kode_negara) || empty($source->no_paspor) || empty($source->nama) || empty($source->kewarganegaraan) || empty($source->jenis_kelamin)) {
+                    DB::rollback(); // Batalkan transaksi awal
+                    return back()->with('error', 'Gagal Verifikasi! Data utama Passport (Kode Negara, No Paspor, Nama, Kewarganegaraan, Jenis Kelamin) masih kosong. Silakan klik tombol Edit terlebih dahulu.');
+                }
+
                 PassportVerified::create([
-                    'submission_id'     => $source->id,
-                    'kode_negara'       => $source->kode_negara,
-                    'no_paspor'         => $source->no_paspor,
-                    'nama'              => $source->nama,
-                    'kewarganegaraan'   => $source->kewarganegaraan,
-                    'jenis_kelamin'     => $source->jenis_kelamin,
-                    'tanggal_lahir'     => $source->tanggal_lahir,
-                    'tempat_lahir'      => $source->tempat_lahir,
-                    'masa_berlaku'      => $source->masa_berlaku,
-                    'tanggal_terbentuk' => $source->tanggal_terbentuk,
-                    'no_reg'            => $source->no_reg,
-                    'passport_image_path'         => $source->passport_image_path,
-                    'verified_by'       => auth()->id(),
+                    'submission_id'         => $source->id,
+                    'kode_negara'           => $source->kode_negara,
+                    'no_paspor'             => $source->no_paspor,
+                    'nama'                  => $source->nama,
+                    'kewarganegaraan'       => $source->kewarganegaraan,
+                    'jenis_kelamin'         => $source->jenis_kelamin,
+                    'tanggal_lahir'         => $source->tanggal_lahir,
+                    'tempat_lahir'          => $source->tempat_lahir,
+                    'masa_berlaku'          => $source->masa_berlaku,
+                    'tanggal_terbentuk'     => $source->tanggal_terbentuk,
+                    'no_reg'                => $source->no_reg,
+                    'no_telp'               => $source->no_telp,
+                    'passport_image_path'   => $source->passport_image_path,
+                    'verified_by'           => auth()->id(),
                 ]);
 
                 $source->update(['status' => 'Done']);
@@ -259,7 +278,7 @@ public function showReportAdmin()
                 $item->display_number = $item->nik;
                 $item->setAttribute('image', $item->ktp_image_path);
                 $item->display_date = $item->date;
-                $item->display_user = $item->user->name;
+                $item->display_user = $item->user?->name ?? 'User Dihapus';
                 $item->display_note = $item->note;
                 return $item;
             });
@@ -273,7 +292,7 @@ public function showReportAdmin()
                 $item->display_number = $item->no_paspor;
                 $item->image = $item->passport_image_path;
                 $item->display_date = $item->date;
-                $item->display_user = $item->user->name;
+                $item->display_user = $item->user?->name ?? 'User Dihapus';
                 $item->display_note = $item->note;
                 return $item;
             });
@@ -311,6 +330,7 @@ public function showReportAdmin()
                 return (object)[
                     'nama' => $item->nama,
                     'tanggal_lahir' => Carbon::parse($item->tanggal_lahir)->format('d M Y'),
+                    'no_telp' => $item->no_telp,
                     'tipe' => 'KTP',
                     'total_checkin' => $group->count()
                 ];
@@ -327,6 +347,7 @@ public function showReportAdmin()
                 return (object)[
                     'nama' => $item->nama,
                     'tanggal_lahir' => Carbon::parse($item->tanggal_lahir)->format('d M Y'),
+                    'no_telp' => $item->no_telp,
                     'tipe' => 'Passport',
                     'total_checkin' => $group->count()
                 ];
@@ -358,6 +379,7 @@ public function showReportAdmin()
             return[
                 'nama' => $item->nama,
                 'tanggal_lahir' => Carbon::parse($item->tanggal_lahir)->format('d M Y'),
+                'no_telp' => $item->no_telp,
                 'tipe' => 'KTP',
                 'total_checkin' => $group->count()
             ];

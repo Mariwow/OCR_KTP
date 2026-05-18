@@ -182,6 +182,9 @@
                                                     <div class="input-group">
                                                         <div class="input-group-text"><i class="feather-lock"></i></div>
                                                         <input type="password" id="input_password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Password" required>
+                                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('input_password', this)">
+                                                            <i class="feather-eye"></i>
+                                                        </button>
                                                         @error('password')
                                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                                         @enderror
@@ -195,6 +198,9 @@
                                                     <div class="input-group">
                                                         <div class="input-group-text"><i class="feather-lock"></i></div>
                                                         <input type="password" id="input_password_confirmation" name="password_confirmation" class="form-control" placeholder="Confirm Password" required>
+                                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('input_password_confirmation', this)">
+                                                            <i class="feather-eye"></i>
+                                                        </button>
                                                         <div class="invalid-feedback" id="js-password-error" style="display: none;">
                                                             Password dan Konfirmasi Password tidak sama!
                                                         </div>
@@ -221,7 +227,7 @@
                                     </div>
                                 </div>
 
-                                <div class="tab-pane fade" id="AccountTab" role="tabpanel">
+                                  <div class="tab-pane fade" id="AccountTab" role="tabpanel">
                                     <div class="card-body p-0">
                                         <div class="table-responsive">
                                             <table class="table table-hover mb-0" id="myTable">
@@ -237,32 +243,26 @@
                                                 <tbody>
                                                     @foreach($users as $user)
                                                     <tr>
-                                                        <td>
-                                                            <div class="hstack gap-3">
-                                                                <div class="avatar-image avatar-md">
-                                                                    <i class="fa-regular fa-user"></i>
-                                                                </div>
-                                                                <div><span class="text-truncate-1-line">{{ $user->name }}</span></div>
-                                                            </div>
-                                                        </td>
+                                                        <td class="fw-semibold">{{ $user->name }}</td>
                                                         <td>{{ $user->email }}</td>
                                                         <td>
-                                                            <span class="badge {{ $user->role == 'admin' ? 'bg-danger' : 'bg-primary' }}">
-                                                                {{ strtoupper($user->role) }}
+                                                            <span class="badge {{ $user->role == 'admin' ? 'bg-soft-danger text-danger' : 'bg-soft-primary text-primary' }}">
+                                                                {{ ucfirst($user->role) }}
                                                             </span>
                                                         </td>
-                                                        <td>{{ $user->created_at->format('d M Y, H:i') }}</td>
-                                                        <td>
+                                                        <td>{{ $user->created_at->format('d/m/Y H:i') }}</td>
+                                                        <td class="text-end">
                                                             <div class="hstack gap-2 justify-content-end">
-                                                                <a href="javascript:void(0);" onclick="openEditAccountModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->email }}', '{{ $user->role }}')" class="avatar-text avatar-md" title="Edit Akun">
+                                                                <button type="button"
+                                                                    onclick="openEditAccountModal({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ $user->email }}', '{{ $user->role }}')"
+                                                                    class="btn btn-sm btn-icon btn-outline-primary" title="Edit">
                                                                     <i class="fas fa-edit"></i>
-                                                                </a>
-                                                                
-                                                                @if ($user->id !== auth()->id())
-                                                                    <a href="javascript:void(0);" onclick="openDeleteAccountModal({{ $user->id }}, '{{ $user->name }}')" class="avatar-text avatar-md text-danger" title="Hapus Akun">
-                                                                        <i class="fa solid fa-trash"></i>
-                                                                    </a>
-                                                                @endif
+                                                                </button>
+                                                                <button type="button"
+                                                                    onclick="confirmDeleteAccount({{ $user->id }}, '{{ addslashes($user->name) }}')"
+                                                                    class="btn btn-sm btn-icon btn-outline-danger" title="Hapus">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -429,6 +429,13 @@
             </div>
         </div>
     </div>
+    {{-- Form siluman untuk delete --}}
+    <form id="hiddenDeleteForm" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+ 
+    {{-- Modal Edit Akun (tetap pakai modal Bootstrap karena ada banyak input) --}}
     <div class="modal fade" id="modalEditAccount" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-lg">
@@ -456,9 +463,9 @@
                                 <option value="admin">Admin</option>
                             </select>
                         </div>
-
+ 
                         <hr class="my-4">
-
+ 
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <label class="form-label fw-bold mb-0">Ubah Password?</label>
                             <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePassword">
@@ -488,32 +495,9 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="modalDeleteAccount" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content text-center shadow-lg">
-                <div class="modal-body p-4">
-                    <i class="fa-solid fa-triangle-exclamation text-danger mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="fw-bold">Hapus Akun?</h5>
-                    <p class="text-muted small mb-4">
-                        Apakah Anda yakin ingin menghapus akun milik <strong id="deleteAccountName" class="text-dark"></strong>? Semua data yang terkait akan ikut terhapus secara permanen.
-                    </p>
-                    
-                    <form id="formDeleteAccount" method="POST">
-                        @csrf
-                        @method('DELETE') <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-danger">Ya, Hapus Permanen</button>
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    @include('modals.status')
 
-    <!--! BEGIN: Vendors JS !-->
+<!--! BEGIN: Vendors JS !-->
     <script src="assets/vendors/js/vendors.min.js"></script>
-    <!-- vendors.min.js {always must need to be top} -->
     <script src="assets/vendors/js/daterangepicker.min.js"></script>
     <script src="assets/vendors/js/apexcharts.min.js"></script>
     <script src="assets/vendors/js/jquery.time-to.min.js "></script>
@@ -526,71 +510,116 @@
     <!--! BEGIN: Theme Customizer  !-->
     <script src="assets/js/theme-customizer-init.min.js"></script>
     <!--! END: Theme Customizer !-->
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ 
     <script>
         $(document).ready(function() {
             $('#myTable').DataTable({
-                "pageLength": 10, // Default jumlah data yang tampil
-                "ordering": true, // Mengaktifkan fitur sorting klik di header tabel
-                "info": true      // Menampilkan tulisan "Showing 1 to 10 of 50 entries"
+                "pageLength": 10,
+                "ordering": true,
+                "info": true
             });
         });
+ 
+        // ── Edit Account (tetap modal Bootstrap karena banyak input) ──
+        function openEditAccountModal(id, name, email, role) {
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_email').value = email;
+            document.getElementById('edit_role').value = role;
+            document.getElementById('formEditAccount').action = '/accountControl/update/' + id;
+            document.querySelector('input[name="password"]').value = '';
+            document.querySelector('input[name="password_confirmation"]').value = '';
+            new bootstrap.Modal(document.getElementById('modalEditAccount')).show();
+        }
+ 
+        // ── Hapus Account (SweetAlert) ──
+        function confirmDeleteAccount(id, name) {
+            Swal.fire({
+                title: 'Hapus Akun?',
+                html: `Apakah Anda yakin ingin menghapus akun milik <strong>${name}</strong>? Semua data terkait akan terhapus secara permanen.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                cancelButtonText: 'Batal',
+                confirmButtonText: 'Ya, Hapus Permanen!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    $('body').css({ 'overflow': '', 'padding-right': '' });
+ 
+                    let form = document.getElementById('hiddenDeleteForm');
+                    form.action = `/users/${id}`;
+                    form.submit();
+                }
+            });
+        }
+ 
+        // ── Validasi password saat buat akun baru ──
+        document.getElementById('formAddAccount').addEventListener('submit', function(event) {
+            let password = document.getElementById('input_password').value;
+            let confirmPassword = document.getElementById('input_password_confirmation').value;
+            let confirmInput = document.getElementById('input_password_confirmation');
+            let errorMsg = document.getElementById('js-password-error');
+ 
+            if (password !== confirmPassword) {
+                event.preventDefault();
+                confirmInput.classList.add('is-invalid');
+                errorMsg.style.display = 'block';
+            } else {
+                confirmInput.classList.remove('is-invalid');
+                errorMsg.style.display = 'none';
+            }
+        });
+
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('feather-eye');
+                icon.classList.add('feather-eye-off');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('feather-eye-off');
+                icon.classList.add('feather-eye');
+            }
+        }
     </script>
+ 
+    @if(session('error'))
+    <script>
+        Swal.fire({
+            title: 'Gagal!',
+            text: "{!! session('error') !!}",
+            icon: 'error',
+            confirmButtonText: 'OK'
+        }).then(() => {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+            $('body').css({ 'overflow': '', 'padding-right': '' });
+        });
+    </script>
+    @endif
+ 
+    @if(session('success'))
+    <script>
+        Swal.fire({
+            title: 'Sukses!',
+            text: "{!! session('success') !!}",
+            icon: 'success',
+            confirmButtonText: 'OK'
+        }).then(() => {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+            $('body').css({ 'overflow': '', 'padding-right': '' });
+        });
+    </script>
+    @endif
 
 </body>
 </html>
-
-<script>
-    function openEditAccountModal(id, name, email, role) {
-    // 1. Isi form dengan data user saat ini
-    document.getElementById('edit_name').value = name;
-    document.getElementById('edit_email').value = email;
-    document.getElementById('edit_role').value = role;
-
-    // 2. Ubah URL action pada form secara dinamis sesuai ID user
-    // Sesuaikan prefix '/accountControl/update/' dengan rute yang kamu buat
-    document.getElementById('formEditAccount').action = '/accountControl/update/' + id;
-
-    // 3. Pastikan kolom password tertutup dan kosong saat modal baru dibuka
-    document.querySelector('input[name="password"]').value = '';
-    document.querySelector('input[name="password_confirmation"]').value = '';
-    
-    // 4. Tampilkan modalnya
-    var myModal = new bootstrap.Modal(document.getElementById('modalEditAccount'));
-    myModal.show();
-}
-
-    function openDeleteAccountModal(id, name) {
-        // Ganti '/users/' dengan format URL (Route) hapus kamu yang sebenarnya
-        const url = `/users/${id}`;
-        document.getElementById('formDeleteAccount').action = url;
-        
-        // Tampilkan nama user di dalam modal sebagai pengingat
-        document.getElementById('deleteAccountName').innerText = name;
-        
-        // Munculkan Modalnya
-        new bootstrap.Modal(document.getElementById('modalDeleteAccount')).show();
-    }
-
-    document.getElementById('formAddAccount').addEventListener('submit', function(event) {
-    let password = document.getElementById('input_password').value;
-    let confirmPassword = document.getElementById('input_password_confirmation').value;
-    let confirmInput = document.getElementById('input_password_confirmation');
-    let errorMsg = document.getElementById('js-password-error');
-
-    // Cek apakah password dan konfirmasinya sama
-    if (password !== confirmPassword) {
-        event.preventDefault(); // Cegah form terkirim!
-        
-        // Munculkan tulisan merah
-        confirmInput.classList.add('is-invalid');
-        errorMsg.style.display = 'block';
-    } else {
-        // Hilangkan tulisan merah kalau sudah sama
-        confirmInput.classList.remove('is-invalid');
-        errorMsg.style.display = 'none';
-    }
-});
-</script>

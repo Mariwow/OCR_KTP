@@ -22,6 +22,7 @@ class PassportVerified extends Model
         'tanggal_terbentuk',
         'no_reg',
         'passport_image_path',
+        'no_telp',
         'verified_by'
     ];
 

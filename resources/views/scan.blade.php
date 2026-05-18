@@ -152,7 +152,7 @@
                             </div>
                         </div>
                     </div>
-                     <div class="col-12">
+                     {{-- <div class="col-12">
                         <div class="card stretch stretch-full">
                             <div class="card-body">
                                 <div class="container mt-4">
@@ -199,7 +199,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
         </div>  

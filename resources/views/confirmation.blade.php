@@ -146,6 +146,7 @@
                                                 <th class="text-center">Type</th>
                                                 <th class="text-center">Uploaded At</th>
                                                 <th class="text-center">Uploaded By</th>
+                                                <th class="text-center">Status</th>
                                                 <th class="text-center">Actions</th>
                                             </tr>
                                         </thead>
@@ -159,7 +160,6 @@
                                                         </div>
                                                         <div>
                                                             <span class="text-truncate-1-line fw-semibold">{{ $data->display_name }}</span>
-                                                            <small class="text-muted">Status: <span class="badge bg-soft-secondary text-secondary">Pending</span></small>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -174,9 +174,20 @@
                                                     <span class="text-truncate-1-line fw-semibold">{{ $data->display_user }}
                                                     </span>
                                                 </td>
+                                                <td class="text-center">
+                                                    <span class="badge {{ match($data->display_status) {
+                                                        'Verified' => 'bg-success',
+                                                        'Done'     => 'bg-primary',
+                                                        'Pending'  => 'bg-warning',
+                                                        'Uploaded' => 'bg-danger',
+                                                        default    => 'bg-secondary'
+                                                        } }}">
+                                                        {{ $data->status }}
+                                                    </span>
+                                                </td>
                                                 <td>
-                                                    <div class="hstack gap-2 justify-content-end">
-                                                        <button type="button" onclick="editDocument({{ $data->id }}, '{{ $data->type }}')" class="btn btn-sm btn-icon btn-outline-primary" title="Edit">
+                                                    <div class="hstack gap-2 justify-content-center">
+                                                        <button onclick="editDocument({{ $data->id }}, '{{ $data->type }}', 'admin')" class="btn btn-sm btn-icon btn-outline-success" title="Periksa & Verifikasi">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
                                                         
@@ -354,10 +365,11 @@
     
     @include('modals.editPassport')
     @include('modals.editKtp')
-    @include('scripts.editScript')
     @include('modals.status')
+    @include('modals.viewPassport')
+    @include('modals.viewKtp')
 
-    <div class="modal fade" id="modalAccept" tabindex="-1" aria-hidden="true">
+    {{-- <div class="modal" id="modalAccept" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="modal-body text-center p-4">
@@ -374,9 +386,9 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="modal fade" id="modalReject" tabindex="-1" aria-hidden="true">
+    </div> --}}
+{{-- 
+    <div class="modal" id="modalReject" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md"> <div class="modal-content">
                 <div class="modal-body p-4">
                     <div class="text-center mb-4">
@@ -400,28 +412,53 @@
                 </div>
             </div>
         </div>
+    </div> --}}
+
+    {{-- <div class="modal" id="modalSuccess" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content text-center p-4 border-0 shadow-lg">
+                <div class="mb-3">
+                    <i class="fa-solid fa-circle-check text-success" style="font-size: 4rem;"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Sukses!</h5>
+                <p id="successMessage" class="text-muted mb-4">Data berhasil disimpan.</p>
+                <button type="button" class="btn btn-success w-100 rounded-pill" data-bs-dismiss="modal">OK, Lanjutkan</button>
+            </div>
+        </div>
     </div>
 
-    <!--! BEGIN: Vendors JS !-->
+    <div class="modal" id="modalError" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content text-center p-4 border-0 shadow-lg">
+                <div class="mb-3">
+                    <i class="fa-solid fa-circle-xmark text-danger" style="font-size: 4rem;"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Oops, Gagal!</h5>
+                <p id="errorMessage" class="text-muted mb-4">Terjadi kesalahan sistem.</p>
+                <button type="button" class="btn btn-danger w-100 rounded-pill" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div> --}}
+
+
     <script src="assets/vendors/js/vendors.min.js"></script>
-    <!-- vendors.min.js {always must need to be top} -->
     <script src="assets/vendors/js/daterangepicker.min.js"></script>
     <script src="assets/vendors/js/apexcharts.min.js"></script>
     <script src="assets/vendors/js/jquery.time-to.min.js "></script>
     <script src="assets/vendors/js/circle-progress.min.js"></script>
-    <!--! END: Vendors JS !-->
-    <!--! BEGIN: Apps Init  !-->
     <script src="assets/js/common-init.min.js"></script>
     <script src="assets/js/analytics-init.min.js"></script>
-    <!--! END: Apps Init !-->
-    <!--! BEGIN: Theme Customizer  !-->
     <script src="assets/js/theme-customizer-init.min.js"></script>
-    <!--! END: Theme Customizer !-->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="assets/vendors/js/select2.min.js"></script>
     <script src="assets/vendors/js/select2-active.min.js"></script>
+
+    {{-- ✅ jQuery dan SweetAlert WAJIB di sini, setelah semua vendor --}}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @include('scripts.editScript')
     <script>
         $(document).ready(function() {
             $('#myTable').DataTable({
@@ -430,50 +467,74 @@
                 "info": true      // Menampilkan tulisan "Showing 1 to 10 of 50 entries"
             });
         });
-$(document).ready(function() {
-    // Aktifkan Select2 untuk Provinsi KTP
-    $('#res_provinsi').select2({
-        dropdownParent: $('#res_provinsi').parent(), 
-        width: '100%',
-        placeholder: "-- Cari & Pilih Provinsi --"
-    });
-    $('#res_agama').select2({
-        dropdownParent: $('#res_agama').parent(), 
-        width: '100%',
-        placeholder: "-- Pilih Agama --"
-    });
         $(document).ready(function() {
-        // Sulap ID res_kewarganegaraan_paspor menjadi Select2 yang aman untuk modal
-        $('#res_kewarganegaraan_paspor').select2({
-            dropdownParent: $('#res_kewarganegaraan_paspor').parent(),  // Sesuaikan dengan ID modal kamu
-            width: '100%',
-            placeholder: "-- Pilih Negara / Kewarganegaraan --"
+            // Aktifkan Select2 untuk Provinsi KTP
+            $('#res_provinsi').select2({
+                dropdownParent: $('#res_provinsi').parent(), 
+                width: '100%',
+                placeholder: "-- Cari & Pilih Provinsi --"
+            });
+            $('#res_agama').select2({
+                dropdownParent: $('#res_agama').parent(), 
+                width: '100%',
+                placeholder: "-- Pilih Agama --"
+            });
+                $(document).ready(function() {
+                // Sulap ID res_kewarganegaraan_paspor menjadi Select2 yang aman untuk modal
+                $('#res_kewarganegaraan_paspor').select2({
+                    dropdownParent: $('#res_kewarganegaraan_paspor').parent(),  // Sesuaikan dengan ID modal kamu
+                    width: '100%',
+                    placeholder: "-- Pilih Negara / Kewarganegaraan --"
+                });
+            });
         });
-    });
-});
-    </script>
+    </script> 
     
+    @if(session('error'))
+    <script>
+        Swal.fire({ 
+            title: 'Gagal!', 
+            text: "{!! session('error') !!}", 
+            icon: 'error', 
+            onfirmButtonText: 'OK'
+         }).then(() => {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+            $('body').css({ 'overflow': '', 'padding-right': '' });
+        });
+    </script>
+    @endif
 
+    @if(session('success'))
+    <script>
+        Swal.fire({ 
+            title: 'Sukses!', 
+            text: "{!! session('success') !!}", 
+            icon: 'success', 
+            confirmButtonText: 'OK' 
+        }).then(() => {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+            $('body').css({ 'overflow': '', 'padding-right': '' });
+        });
+    </script>
+    @endif
+
+    <form id="hiddenAcceptForm" method="POST" style="display: none;">
+        @csrf
+    </form>
+    <form id="hiddenRejectForm" method="POST" style="display: none;">
+        @csrf
+        <input type="hidden" name="note" id="hiddenRejectNote">
+    </form>
+
+    
+    {{-- <script>
+    window.prepareAction = function(id, rawType, action) {
+        alert('prepareAction jalan! id=' + id + ' type=' + rawType + ' action=' + action);
+    }
+</script> --}}
 </body>
 </html>
 
-<script>
-function prepareAction(id, type, action) {
-    if (action === 'accept') {
-        // Ganti URL Form sesuai route kamu (Sesuaikan namanya!)
-        const url = `/verify/accept/${id}/${type}`;
-        document.getElementById('formAccept').action = url;
-        
-        // Munculkan Modal
-        new bootstrap.Modal(document.getElementById('modalAccept')).show();
-        
-    } else if (action === 'reject') {
-        // Ganti URL Form sesuai route kamu
-        const url = `/verify/reject/${id}/${type}`;
-        document.getElementById('formReject').action = url;
-        
-        // Munculkan Modal
-        new bootstrap.Modal(document.getElementById('modalReject')).show();
-    }
-}
-</script>
+

@@ -128,7 +128,6 @@
                                                 <th class="text-center">Type</th>
                                                 <th class="text-center">Uploaded At</th>
                                                 <th class="text-center">Status</th>
-                                                <th class="text-center">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -161,13 +160,6 @@
                                                     } }}">
                                                         {{ $data->status }}
                                                     </span>
-                                                </td>
-                                                <td>
-                                                    <div class="hstack gap-2 justify-content-center">
-                                                        <button type="button" onclick="editDocument({{ $data->id }}, '{{ $data->type }}')" class="btn btn-sm btn-icon btn-outline-primary" title="Edit">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                    </div>
                                                 </td>
                                             </tr>
                                             @endforeach

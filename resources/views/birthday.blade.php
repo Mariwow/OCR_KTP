@@ -157,8 +157,9 @@
                                                     <tr>
                                                         <th class="text-center">Guest Name</th>
                                                         <th class="text-center">Birth Date</th>
+                                                        <th class="text-center">Telephone Number</th>
                                                         <th class="text-center">Document Type</th>
-                                                        <th class="text-center">Total Check-in</th> 
+                                                        <th class="text-center">Total Check-in</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -167,6 +168,7 @@
                                                         <td><span class="fw-semibold">{{ $tamu->nama }}</span></td>
                                                         <td class="text-center"><span class="fw-semibold">{{ $tamu->tanggal_lahir}} (Today!)</span></td>
                                                         <td class="text-center"><span class="badge {{ $tamu->tipe == 'KTP' ? 'bg-soft-primary text-primary' : 'bg-soft-warning text-dark' }}">{{ $tamu->tipe }}</span></td>
+                                                        <td class="text-center"><span class="fw-semibold">{{ $tamu->no_telp }}</span></td>
                                                         <td class="text-center"><span class="badge bg-primary">{{ $tamu->total_checkin }} Times</span></td>
                                                    </tr>
                                                    @empty
@@ -209,6 +211,7 @@
                                             <tr>
                                                 <th class="text-center">Name</th>
                                                 <th class="text-center">Birth Date</th>
+                                                <th class="text-center">Telephone Number</th>
                                                 <th class="text-center">Document Type</th>
                                                 <th class="text-center">Total Check</th>
                                             </tr>
@@ -446,6 +449,7 @@
                                     <tr>
                                         <td><span class="fw-semibold">${tamu.nama}</span></td>
                                         <td class="text-center">${tamu.tanggal_lahir}</td>
+                                        <td class="text-center">${tamu.no_telp || '-'}</td>
                                         <td class="text-center"><span class="badge ${badgeTipe}">${tamu.tipe}</span></td>
                                         <td class="text-center"><span class="badge bg-primary">${tamu.total_checkin} Times</span></td>
                                     </tr>

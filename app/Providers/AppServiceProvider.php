@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     {
         if (config('app.env') === 'production' || env('FORCE_HTTPS', true)) {
             URL::forceRootUrl(config('app.url'));
-            URL::forceScheme('https');
+            // URL::forceScheme('https');
         }
     }
 }

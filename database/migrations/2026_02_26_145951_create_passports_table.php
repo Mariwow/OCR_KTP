@@ -30,6 +30,8 @@ return new class extends Migration
             $table->string('status');
             $table->text('note')->nullable();
 
+            $table->string('no_telp')->nullable();
+
             $table->dateTime('created_at')->nullable();
             $table->dateTime('updated_at')->nullable();
 

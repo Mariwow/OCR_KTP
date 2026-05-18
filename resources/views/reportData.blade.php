@@ -35,6 +35,22 @@
             margin-bottom: 4px;
             font-size: 13px;
         }
+        .btn-excel-custom {
+            background-color: #ffffff !important; 
+            color: #000000 !important;
+            border: 1px solid #000000 !important;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn-excel-custom:hover {
+            background-color: #198754 !important; 
+            border-color: #198754 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-excel-custom i {
+            color: #ffffff !important;
+        }
     </style>
 </head>
 <body>
@@ -175,15 +191,14 @@
                                             </div>
 
                                             <!-- Tombol Cetak Excel -->
-                                            <button type="submit" class="btn btn-success w-100 d-flex justify-content-center align-items-center gap-2" style="padding: 10px;">
-                                                <i class="fa-solid fa-file-excel"></i> Cetak Excel
+                                            <button type="submit" name="export_type" value="ktp" class="btn btn-excel-custom w-100 d-flex justify-content-center align-items-center gap-2" style="padding: 10px; margin-bottom: 10px;">
+                                                <i class="fa-solid fa-file-excel" style="color: black !important;"></i> Cetak Excel KTP
                                             </button>
-                                        </form>
 
-                                        <!-- Tombol Cetak Grafik -->
-                                        <button type="button" id="btnCetakGrafik" class="btn btn-outline-primary w-100 d-flex justify-content-center align-items-center gap-2" style="padding: 10px;">
-                                            <i class="fa-solid fa-image"></i> Cetak Grafik
-                                        </button>
+                                            <button type="submit" name="export_type" value="passport" class="btn btn-excel-custom w-100 d-flex justify-content-center align-items-center gap-2" style="padding: 10px; margin-bottom: 10px;">
+                                                <i class="fa-solid fa-file-excel" style="color: #000000 !important;"> </i> Cetak Excel Passport
+                                            </button>        
+                                        </form>
 
                                     </div>
 
@@ -254,9 +269,13 @@
                                                 
                                                 <td class="text-center">
                                                     <div class="hstack gap-2 justify-content-end">
+                                                        <button type="button" onclick="editDocument({{ $data->id }}, '{{ $data->type }}', 'admin')" class="btn btn-sm btn-icon btn-outline-primary" title="Rincian">
+                                                            <i class="fas fa-edit"></i>    
+                                                        </button>
                                                         <button type="button" onclick="viewDocument({{ $data->id }}, '{{ $data->type }}')" class="btn btn-sm btn-icon btn-outline-primary" title="Rincian">
                                                             <i class="fa-solid fa-file"></i>    
                                                         </button>
+                                                        
                                                     </div>
                                                 </td>
                                             </tr>
@@ -424,8 +443,9 @@
 
     @include('modals.viewPassport')
     @include('modals.viewKtp')
-    @include('scripts.editScript')
-
+    @include('modals.editKtp')
+    @include('modals.editPassport')
+    
  <!-- 1. WAJIB PALING ATAS: Panggil jQuery dulu agar plugin lain bisa menumpang -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
@@ -441,13 +461,32 @@
     <script src="assets/js/common-init.min.js"></script>
     <script src="assets/js/analytics-init.min.js"></script>
     <script src="assets/js/theme-customizer-init.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     
     <!-- 4. DataTables -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @include('scripts.editScript')
     <!-- 5. KODE CUSTOM KITA (Jadikan 1 Blok Saja) -->
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.modal').forEach(function(modalEl) {
+            const instance = bootstrap.Modal.getInstance(modalEl);
+            if (instance) instance.dispose();
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+            modalEl.setAttribute('aria-hidden', 'true');
+            modalEl.removeAttribute('aria-modal');
+            modalEl.removeAttribute('role');
+        });
+        document.querySelectorAll('.modal-backdrop').forEach(e => e.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+    });
         function prepareAction(id, type, action) {
             if (action === 'accept') {
                 const url = `/verify/accept/${id}/${type}`;
@@ -461,6 +500,17 @@
         }
 
         $(document).ready(function() {
+             document.querySelectorAll('.modal').forEach(function(modalEl) {
+                modalEl.classList.remove('show');
+                modalEl.style.display = 'none';
+                modalEl.setAttribute('aria-hidden', 'true');
+                modalEl.removeAttribute('aria-modal');
+                modalEl.removeAttribute('role');
+            });
+            document.querySelectorAll('.modal-backdrop').forEach(e => e.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
             // 1. DEKLARASI WADAH GRAFIK DI AWAL (Biar bisa diakses tombol cetak)
             var docChart = null;
 
@@ -579,6 +629,7 @@
             });
 
         });
+        
     </script>
 </body>
 </html>

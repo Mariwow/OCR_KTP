@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Modal Status</title>
-</head>
-<body>
+
     <div class="modal fade" id="modalSuccess" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content text-center shadow-lg border-0">
@@ -49,8 +41,7 @@
             </div>
         </div>
     </div>
-</body>
-</html>
+
 <script>
     // Pastikan script jalan setelah seluruh HTML selesai dimuat
     document.addEventListener("DOMContentLoaded", function() {

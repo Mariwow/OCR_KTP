@@ -8,14 +8,22 @@ use App\Models\Passport;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
+use App\Exports\KtpExport;
+use App\Exports\PassportExport;
 
 class ReportController extends Controller
 {
-    public function exportExcel(Request $request){
-        $tanggal = $request->input('date_filter');
+    public function exportExcel(Request $request) 
+    {
+        $dateFilter = $request->get('date_range'); // sesuaikan name input date kamu
+        $type = $request->get('export_type');
 
-        return Excel::download(new ReportDataExport($tanggal), 'Report_Data_Trihaka.xlsx');
-    }   
+        if ($type === 'ktp') {
+            return Excel::download(new KtpExport($dateFilter), 'Laporan_KTP_' . date('Ymd') . '.xlsx');
+        } else {
+            return Excel::download(new PassportExport($dateFilter), 'Laporan_Passport_' . date('Ymd') . '.xlsx');
+        }
+    }
 
     public function getStatistics(Request $request){
        $dateFilter = $request->input('date_filter');
