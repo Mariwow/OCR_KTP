@@ -39,7 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-Route::post('upload-ktp', [ReadKtpController::class, 'upload'])->name('ktp.upload');
+Route::post('ktp/upload', [ReadKtpController::class, 'upload'])->name('ktp.upload');
 
 Route::post('/ktp/update', [ReadKtpController::class, 'update'])->name('ktp.update');
 
