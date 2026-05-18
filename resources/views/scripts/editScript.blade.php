@@ -174,10 +174,10 @@ window.handleUpload = function(){
     const fileInput = document.getElementById('fileInput');
 
     const form = document.querySelector('#modalResultOCR #formUpdateKtp');
-if (form) {
-    form.reset();
-    form.action = "{{ route('ktp.update') }}"; 
-}
+    if (form) {
+        form.reset();
+        form.action = "/ktp/update"; 
+    }
     const btnDraft = document.querySelector('#modalResultOCR #btnDraft');
     if (btnDraft) btnDraft.style.display = 'inline-block';
 
@@ -283,7 +283,7 @@ window.handlePassportUpload = function(){
     const formPaspor = document.getElementById('formUpdatePassport');
     if (formPaspor) {
         formPaspor.reset();
-        formPaspor.action = "{{ route('passport.update') }}"; 
+        formPaspor.action = "/passport/update"; 
     }
 
     const btnDraft = document.getElementById('btnDraftPassport');
@@ -320,7 +320,7 @@ window.handlePassportUpload = function(){
 // 5. AJAX REQUESTS KE SERVER
 // ==========================================
 window.sendPassportToServer = function(formData, btnSave, originalText) {
-    fetch("{{ route('passport.upload') }}", {
+    fetch("/passport/upload", {
         method: "POST",
         body: formData,
         headers: {
@@ -350,7 +350,7 @@ window.sendPassportToServer = function(formData, btnSave, originalText) {
 }
 
 window.processRequest = function(formData, btn, originalText) {
-    fetch("{{ route('ktp.upload') }}", {
+    fetch("/ktp/upload", {
         method: "POST",
         body: formData,
         headers: {
