@@ -124,7 +124,7 @@
                                         <div class="card stretch stretch-full border border-dashed border-gray-5">
                                             <div class="card-body rounded-3 text-center">
                                                 <div class="ratio-2-3">
-                                                    <img src="{{ asset('assets/images/ktp.png') }}" alt="Gambar KTP">
+                                                    <img src="{{ asset('assets/images/ktp.png') }}" alt="Gambar KTP" class="img-fluid rounded" style="width: 100%; height: 250px; object-fit: cover;">
                                                 </div>
                                                 <div class="fs-4 fw-bolder text-dark mt-3 mb-1">
                                                     <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalUploadKTP">
@@ -138,7 +138,7 @@
                                         <div class="card stretch stretch-full border border-dashed border-gray-5">
                                             <div class="card-body rounded-3 text-center">
                                                 <div class="ratio-2-3">
-                                                    <img src="{{ asset('assets/images/Passport.webp') }}" alt="Gambar Passport">
+                                                    <img src="{{ asset('assets/images/Passport.webp') }}" alt="Gambar Passport" class="img-fluid rounded" style="width: 100%; height: 250px; object-fit: cover;">
                                                 </div>
                                                 <div class="fs-4 fw-bolder text-dark mt-3 mb-1">
                                                     <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalUploadPassport">
