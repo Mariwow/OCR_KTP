@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KtpVerificationController;
 use App\Http\Controllers\ReportController;
+use Illuminate\Support\Facades\File;
 use Carbon\Carbon;
 use App\Models\ReadKtp;
 use App\Models\Passport;
@@ -113,3 +114,16 @@ Route::get('/report-data/statistic', [ReportController::class, 'getStatistics'])
 Route::get('/birthday', [DashboardController::class, 'birthday'])->name('birthday');
 
 Route::get('/birthday/data', [DashboardController::class, 'getBirthdayData'])->name('birthday.data');
+
+Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
+    // Cari alamat asli fotonya di dalam brankas storage
+    $path = storage_path('app/public/' . $folder . '/' . $filename);
+
+    // Cek apakah fotonya benar-benar ada
+    if (!File::exists($path)) {
+        abort(404);
+    }
+
+    // Ambil dan tampilkan fotonya langsung ke browser!
+    return response()->file($path);
+});
