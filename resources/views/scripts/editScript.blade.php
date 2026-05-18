@@ -655,7 +655,7 @@ window.tambahKtpBaru = function(){
     const formKtp = document.getElementById('formUpdateKtp');
     if (formKtp) {
         formKtp.reset();
-        formKtp.action = "{{ route('ktp.update') }}"; 
+        formKtp.action = "/ktp/update"; 
     }
 
     let btnDraft = document.querySelector('#modalResultOCR #btnDraft');
@@ -671,7 +671,7 @@ window.tambahPassportBaru = function() {
     const formPaspor = document.getElementById('formUpdatePassport');
     if(formPaspor){
         formPaspor.reset();
-        formPaspor.action = "{{ route('passport.update') }}"; 
+        formPaspor.action = "/passport/update"; 
     }
 
     let btnDraft = document.querySelector('#modalInputDataPassport #btnDraftPassport');
@@ -696,7 +696,7 @@ window.submitKtpAjax = function() {
         btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Menyimpan...`;
     }
 
-    fetch(form.action, {
+    fetch("/ktp/update", { 
         method: "POST",
         body: new FormData(form),
         headers: {
@@ -743,7 +743,7 @@ window.submitPassportAjax = function() {
         btnUpdate.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Menyimpan...`;
     }
 
-    fetch(form.action, { 
+    fetch("/passport/update", { 
         method: "POST",
         body: new FormData(form),
         headers: {
